@@ -1,0 +1,398 @@
+{% extends "market/base.html" %}
+{% block title %}Home — Mud2Meal{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* HERO SECTION */
+    .hero {
+        background: linear-gradient(
+            to bottom,
+            rgba(0,0,0,0.3),
+            rgba(15,31,15,0.95)
+        ),
+        url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1600')
+        center/cover no-repeat;
+        height: 70vh;
+        display: flex;
+        align-items: center;
+        padding: 0 60px;
+        margin: -30px -40px 40px;
+    }
+
+    .hero-content h1 {
+        font-size: 52px;
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    .hero-content h1 span { color: #5cb85c; }
+
+    .hero-content p {
+        font-size: 18px;
+        color: #ccc;
+        margin: 16px 0 30px;
+        max-width: 500px;
+        line-height: 1.8;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 16px;
+    }
+
+    .hero-btn {
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .hero-btn-primary {
+        background: #5cb85c;
+        color: #fff;
+    }
+
+    .hero-btn-primary:hover {
+        background: #4cae4c;
+        transform: scale(1.05);
+    }
+
+    .hero-btn-secondary {
+        border: 2px solid #fff;
+        color: #fff;
+    }
+
+    .hero-btn-secondary:hover {
+        background: #fff;
+        color: #0f1f0f;
+        transform: scale(1.05);
+    }
+
+    /* STATS */
+    .stats {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 160px;
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+    }
+
+    .stat-card .number {
+        font-size: 36px;
+        font-weight: 900;
+        color: #5cb85c;
+    }
+
+    .stat-card .label {
+        font-size: 14px;
+        color: #888;
+        margin-top: 6px;
+    }
+
+    /* CROP GRID */
+    .crop-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .crop-card {
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .crop-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(92,184,92,0.2);
+    }
+
+    .crop-card img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+    }
+
+    .crop-card-placeholder {
+        width: 100%;
+        height: 160px;
+        background: #243824;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+    }
+
+    .crop-card-body {
+        padding: 14px;
+    }
+
+    .crop-card-body h3 {
+        font-size: 16px;
+        color: #fff;
+        margin-bottom: 6px;
+    }
+
+    .crop-price {
+        color: #5cb85c;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .crop-farmer {
+        color: #888;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .crop-location {
+        color: #666;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    /* CATEGORIES */
+    .categories {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+    }
+
+    .category-pill {
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        color: #5cb85c;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .category-pill:hover,
+    .category-pill.active {
+        background: #5cb85c;
+        color: #fff;
+    }
+
+    /* HOW IT WORKS */
+    .how-it-works {
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 16px;
+        padding: 40px;
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
+    .steps {
+        display: flex;
+        gap: 20px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .step {
+        flex: 1;
+        min-width: 180px;
+        max-width: 220px;
+    }
+
+    .step-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+    }
+
+    .step h3 {
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .step p {
+        color: #888;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .step-arrow {
+        font-size: 24px;
+        color: #5cb85c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-content">
+        <h1>Fresh From <span>Farm</span><br>Direct To You</h1>
+        <p>Buy fresh crops directly from local farmers.
+           No middlemen. Fair prices for farmers,
+           fresh produce for you.</p>
+        <div class="hero-buttons">
+            {% if not user.is_authenticated %}
+            <a href="/register/" class="hero-btn hero-btn-primary">
+                🌾 Join as Farmer/Buyer
+            </a>
+            {% endif %}
+            <a href="/crops/" class="hero-btn hero-btn-secondary">
+                Browse Crops →
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat-card">
+        <div class="number">{{ total_crops }}+</div>
+        <div class="label">🥦 Crops Listed</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">500+</div>
+        <div class="label">🌾 Farmers</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">3000+</div>
+        <div class="label">🛒 Happy Buyers</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">20+</div>
+        <div class="label">📍 Districts</div>
+    </div>
+</div>
+
+<!-- Browse by Category -->
+<div class="section-title">🌿 Browse by Category</div>
+<div class="categories">
+    <span class="category-pill active" data-category="all" onclick="filterCrops('all', this)">All</span>
+    {% for cat in categories %}
+    <span class="category-pill" data-category="{{ cat.id }}" onclick="filterCrops('{{ cat.id }}', this)">
+        {{ cat.icon }} {{ cat.name }}
+    </span>
+    {% endfor %}
+</div>
+
+<!-- Filtered Crops Grid -->
+<div class="crop-grid" id="crops-grid">
+    {% for crop in all_crops %}
+    <a href="/crop/{{ crop.id }}/" class="crop-card" data-category="{{ crop.category.id }}">
+        {% if crop.photo %}
+            <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
+        {% else %}
+            <div class="crop-card-placeholder">
+                {{ crop.category.icon|default:"🌾" }}
+            </div>
+        {% endif %}
+        <div class="crop-card-body">
+            <h3>{{ crop.name }}</h3>
+            <div class="crop-price">₹{{ crop.price }}/{{ crop.get_unit_display }}</div>
+            <div class="crop-farmer">👨‍🌾 {{ crop.farmer.user.get_full_name }}</div>
+            <div class="crop-location">📍 {{ crop.district }}</div>
+        </div>
+    </a>
+    {% empty %}
+    <p style="color:#888; grid-column: span 4;">No crops available.</p>
+    {% endfor %}
+</div>
+
+<script>
+function filterCrops(categoryId, btn) {
+    document.querySelectorAll('.category-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#crops-grid .crop-card').forEach(card => {
+        card.style.display =
+            (categoryId === 'all' || card.dataset.category === categoryId)
+            ? 'block' : 'none';
+    });
+}
+</script>
+
+<!-- FEATURED CROPS -->
+<div class="section-title">🔥 Featured Crops</div>
+<div class="crop-grid">
+    {% for crop in featured_crops %}
+    <a href="/crop/{{ crop.id }}/" class="crop-card">
+        {% if crop.photo %}
+            <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
+        {% else %}
+                <div class="crop-card-placeholder">
+                    {% if crop.category %}
+                        {{ crop.category.icon }}
+                    {% else %}
+                         🌾
+                    {% endif %}
+        </div>
+        {% endif %}
+        <div class="crop-card-body">
+            <h3>{{ crop.name }}</h3>
+            <div class="crop-price">₹{{ crop.price }}/{{ crop.get_unit_display }}</div>
+            <div class="crop-farmer">👨‍🌾 {{ crop.farmer.user.get_full_name }}</div>
+            <div class="crop-location">📍 {{ crop.district }}</div>
+        </div>
+    </a>
+    {% empty %}
+    <p style="color:#888; grid-column: span 4;">
+        No featured crops yet. Add crops from admin panel!
+    </p>
+    {% endfor %}
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-it-works">
+    <div class="section-title" style="border:none; text-align:center;">
+        ⚙️ How Mud2Meal Works
+    </div>
+    <div class="steps">
+        <div class="step">
+            <div class="step-icon">🌾</div>
+            <h3>Farmer Lists Crop</h3>
+            <p>Farmer registers and lists their fresh crops with price and quantity</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <div class="step-icon">🔍</div>
+            <h3>Buyer Searches</h3>
+            <p>Buyer searches and finds fresh crops by location and category</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <div class="step-icon">🤝</div>
+            <h3>Direct Connect</h3>
+            <p>Buyer contacts farmer directly — no middleman involved</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <div class="step-icon">🍽️</div>
+            <h3>Fresh to Table</h3>
+            <p>Fresh crops delivered directly from farm to your table</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,668 @@
+{% extends "market/base.html" %}
+{% block title %}Farmer Dashboard — Mud2Meal{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* DASHBOARD HEADER */
+    .dashboard-header {
+        background: linear-gradient(to right, #1a2e1a, #0f1f0f);
+        border: 1px solid #2d5a1b;
+        border-radius: 16px;
+        padding: 30px 40px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 26px;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .dashboard-header p {
+        color: #888;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .btn-add {
+        background: #5cb85c;
+        color: #fff;
+        padding: 10px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+        transition: background 0.2s;
+    }
+
+    .btn-add:hover { background: #4cae4c; }
+
+    /* STATS */
+    .stats {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 140px;
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .stat-card .number {
+        font-size: 32px;
+        font-weight: 900;
+        color: #5cb85c;
+    }
+
+    .stat-card .label {
+        font-size: 13px;
+        color: #888;
+        margin-top: 4px;
+    }
+
+    /* CROP TABLE */
+    .table-wrap {
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .table-title {
+        padding: 16px 24px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        border-bottom: 1px solid #2d5a1b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        padding: 12px 20px;
+        text-align: left;
+        color: #888;
+        font-size: 13px;
+        font-weight: bold;
+        border-bottom: 1px solid #2d5a1b;
+        background: #0f1f0f;
+    }
+
+    td {
+        padding: 14px 20px;
+        font-size: 14px;
+        color: #ddd;
+        border-bottom: 1px solid #1a2e1a;
+    }
+
+    tr:hover td { background: #1f3a1f; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status-available {
+        background: rgba(92,184,92,0.2);
+        color: #5cb85c;
+    }
+
+    .status-sold {
+        background: rgba(220,53,69,0.2);
+        color: #ff6b6b;
+    }
+
+    .status-unavailable {
+        background: rgba(255,193,7,0.2);
+        color: #ffc107;
+    }
+
+    .btn-edit {
+        background: transparent;
+        border: 1px solid #5cb85c;
+        color: #5cb85c;
+        padding: 5px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-edit:hover {
+        background: #5cb85c;
+        color: #fff;
+    }
+
+    .btn-delete {
+        background: transparent;
+        border: 1px solid #ff6b6b;
+        color: #ff6b6b;
+        padding: 5px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+        background: #ff6b6b;
+        color: #fff;
+    }
+
+    /* ADD CROP FORM */
+    .form-card {
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .form-card-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 24px;
+        border-left: 3px solid #5cb85c;
+        padding-left: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 14px;
+        background: #0f1f0f;
+        border: 1px solid #2d5a1b;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+        transition: border 0.2s;
+        resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #5cb85c;
+    }
+
+    .form-group select option {
+        background: #0f1f0f;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 16px;
+    }
+
+    .btn-submit {
+        background: #5cb85c;
+        color: #fff;
+        padding: 12px 32px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-submit:hover { background: #4cae4c; }
+
+
+    /* ENQUIRIES */
+    .enquiry-card {
+        background: #0f1f0f;
+        border: 1px solid #2d5a1b;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .enquiry-crop {
+        color: #5cb85c;
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .enquiry-buyer {
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+
+    .enquiry-message {
+        color: #ccc;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #2d5a1b;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        color: #888;
+        font-size: 14px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .checkbox-group input {
+        width: auto;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        margin-bottom: 0;
+        cursor: pointer;
+        color: #ccc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- DASHBOARD HEADER -->
+<div class="dashboard-header">
+    <div>
+        <h1>🌾 Farmer Dashboard</h1>
+        <p>Welcome back, {{ request.user.get_full_name }} !</p>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat-card">
+        <div class="number">{{ total_crops }}</div>
+        <div class="label">🌾 Total Crops</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ available_crops }}</div>
+        <div class="label">✅ Available</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ sold_crops }}</div>
+        <div class="label">💰 Sold</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ total_enquiries }}</div>
+        <div class="label">📩 Enquiries</div>
+    </div>
+</div>
+
+
+<!-- ADD CROP FORM -->
+<div class="form-card">
+    <div class="form-card-title">➕ Add New Crop</div>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_crop">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Crop Name *</label>
+                <input type="text" name="name"
+                       placeholder="e.g. Wheat, Tomato" required>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select name="category">
+                    <option value="">Select Category</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">
+                        {{ cat.icon }} {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" rows="3"
+                      placeholder="Describe your crop quality, harvest date etc.">
+            </textarea>
+        </div>
+
+        <div class="form-row-3">
+            <div class="form-group">
+                <label>Price *</label>
+                <input type="text" name="price"
+                       placeholder="e.g. 25" required>
+            </div>
+            <div class="form-group">
+                <label>Unit</label>
+                <select name="unit">
+                    <option value="kg">Kilogram</option>
+                    <option value="quintal">Quintal</option>
+                    <option value="ton">Ton</option>
+                    <option value="dozen">Dozen</option>
+                    <option value="piece">Piece</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity Available</label>
+                <input type="text" name="quantity"
+                       placeholder="e.g. 500 kg">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>District</label>
+                <input type="text" name="district"
+                       placeholder="e.g. Warangal"
+                       value="{{ farmer.district }}">
+            </div>
+            <div class="form-group">
+                <label>State</label>
+                <input type="text" name="state"
+                       placeholder="e.g. Telangana"
+                       value="{{ farmer.state }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Crop Photo</label>
+                <input type="file" name="photo"
+                       accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="available">Available</option>
+                    <option value="sold">Sold</option>
+                    <option value="unavailable">Unavailable</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" name="is_featured"
+                   id="is_featured" value="1">
+            <label for="is_featured">
+                ⭐ Feature this crop on home page
+            </label>
+        </div>
+
+        <br>
+        <button type="submit" class="btn-submit">
+            ➕ Add Crop
+        </button>
+    </form>
+</div>
+
+<!-- MY CROPS TABLE -->
+<div class="table-wrap">
+    <div class="table-title">
+        <span>🌾 My Crops ({{ total_crops }})</span>
+    </div>
+    {% if crops %}
+    <table>
+        <thead>
+            <tr>
+                <th>Crop</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>District</th>
+                <th>Status</th>
+                <th>Enquiries</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for crop in crops %}
+            <tr>
+                <td>
+                    <strong style="color:#fff;">
+                        {{ crop.name }}
+                    </strong>
+                </td>
+                <td>
+                    {% if crop.category %}
+                        {{ crop.category.icon }} {{ crop.category.name }}
+                    {% else %}—{% endif %}
+                </td>
+                <td style="color:#5cb85c; font-weight:bold;">
+                    ₹{{ crop.price }}/{{ crop.get_unit_display }}
+                </td>
+                <td>{{ crop.quantity|default:"—" }}</td>
+                <td>{{ crop.district|default:"—" }}</td>
+                <td>
+                    <span class="status-badge status-{{ crop.status }}">
+                        {{ crop.get_status_display }}
+                    </span>
+                </td>
+                <td style="color:#5cb85c;">
+                    {{ crop.enquiries.count }}
+                </td>
+                <td style="display:flex; gap:8px;">
+                    <a href="/crop/{{ crop.id }}/edit/"
+                    class="btn-edit">✏️ Edit</a>
+                    <form method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_crop">
+                        <input type="hidden" name="crop_id" value="{{ crop.id }}">
+                        <button type="submit" class="btn-delete"
+                            onclick="return confirm('Delete {{ crop.name }}?')">
+                            🗑 Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">
+        No crops added yet. Add your first crop above! 🌾
+    </div>
+    {% endif %}
+</div>
+
+<!-- RECENT ENQUIRIES -->
+<div class="table-wrap">
+    <div class="table-title">
+        <span>📩 Enquiries
+            {% if unread %}
+            <span style="background:#e50914; color:#fff;
+                         padding:2px 8px; border-radius:10px;
+                         font-size:12px; margin-left:8px;">
+                {{ unread }} New
+            </span>
+            {% endif %}
+        </span>
+    </div>
+
+    {% if enquiries %}
+        {% for enquiry in enquiries %}
+        <div style="margin:16px; background:rgba(255,255,255,0.03);
+                    border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px; padding:20px;">
+
+            <!-- ENQUIRY TOP -->
+            <div style="display:flex; justify-content:space-between;
+                        align-items:center; flex-wrap:wrap; gap:10px;
+                        margin-bottom:12px;">
+                <div>
+                    <div style="font-size:16px; font-weight:bold; color:#fff;">
+                        🌾 {{ enquiry.crop.name }}
+                    </div>
+                    <div style="color:#888; font-size:13px; margin-top:4px;">
+                        👤 {{ enquiry.buyer.user.get_full_name }}
+                        — 📞 {{ enquiry.phone }}
+                    </div>
+                    <div style="color:#666; font-size:12px; margin-top:2px;">
+                        🕐 {{ enquiry.created|date:"d M Y, h:i A" }}
+                    </div>
+                </div>
+                {% if enquiry.is_read %}
+                    <span style="background:rgba(86,171,47,0.2);
+                                 color:#a8e063; padding:4px 12px;
+                                 border-radius:12px; font-size:12px;">
+                        ✅ Read
+                    </span>
+                {% else %}
+                    <span style="background:rgba(247,151,30,0.2);
+                                 color:#ffd200; padding:4px 12px;
+                                 border-radius:12px; font-size:12px;">
+                        🔔 New
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- MESSAGE -->
+            <div style="background:rgba(255,255,255,0.03);
+                        border-left:3px solid #f7971e;
+                        border-radius:0 8px 8px 0;
+                        padding:12px 16px; color:#ccc;
+                        font-size:13px; line-height:1.7;
+                        margin-bottom:14px;">
+                💬 {{ enquiry.message }}
+            </div>
+
+            <!-- REPLY SECTION -->
+            {% if enquiry.reply %}
+            <div style="background:rgba(86,171,47,0.08);
+                        border:1px solid rgba(86,171,47,0.2);
+                        border-radius:10px; padding:14px;
+                        margin-bottom:14px;">
+                <div style="color:#a8e063; font-size:13px;
+                            font-weight:bold; margin-bottom:6px;">
+                    ✅ Your Reply:
+                </div>
+                <div style="color:#ccc; font-size:13px; line-height:1.6;">
+                    {{ enquiry.reply.message }}
+                </div>
+                <div style="color:#666; font-size:11px; margin-top:6px;">
+                    {{ enquiry.reply.created|date:"d M Y, h:i A" }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ACTIONS -->
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+                <!-- MARK READ -->
+                {% if not enquiry.is_read %}
+                <form method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="mark_read">
+                    <input type="hidden" name="enquiry_id" value="{{ enquiry.id }}">
+                    <button type="submit"
+                            style="background:transparent;
+                                   border:1px solid rgba(255,255,255,0.1);
+                                   color:#888; padding:7px 16px;
+                                   border-radius:8px; font-size:13px;
+                                   cursor:pointer;">
+                        ✓ Mark as Read
+                    </button>
+                </form>
+                {% endif %}
+
+                <!-- REPLY BUTTON -->
+                <button onclick="toggleReply('reply_{{ enquiry.id }}')"
+                        style="background:linear-gradient(135deg,#f7971e,#ffd200);
+                               color:#000; border:none; padding:7px 16px;
+                               border-radius:8px; font-size:13px;
+                               font-weight:bold; cursor:pointer;">
+                    💬 {% if enquiry.reply %}Edit Reply{% else %}Reply{% endif %}
+                </button>
+            </div>
+
+            <!-- REPLY FORM -->
+            <div id="reply_{{ enquiry.id }}"
+                 style="display:none; margin-top:14px;">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reply_enquiry">
+                    <input type="hidden" name="enquiry_id" value="{{ enquiry.id }}">
+                    <textarea name="reply_message" rows="3"
+                              style="width:100%; padding:12px 16px;
+                                     background:rgba(255,255,255,0.05);
+                                     border:1px solid rgba(255,255,255,0.1);
+                                     border-radius:10px; color:#fff;
+                                     font-size:14px; outline:none;
+                                     resize:vertical; margin-bottom:10px;"
+                              placeholder="Type your reply to buyer..."
+                              required>{% if enquiry.reply %}{{ enquiry.reply.message }}{% endif %}</textarea>
+                    <button type="submit"
+                            style="background:linear-gradient(135deg,#56ab2f,#a8e063);
+                                   color:#000; border:none; padding:10px 24px;
+                                   border-radius:8px; font-size:14px;
+                                   font-weight:bold; cursor:pointer;">
+                        ✅ Send Reply
+                    </button>
+                </form>
+            </div>
+
+        </div>
+        {% endfor %}
+    {% else %}
+    <div style="text-align:center; padding:40px; color:#888;">
+        No enquiries yet 📩
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleReply(id) {
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+{% endblock %}

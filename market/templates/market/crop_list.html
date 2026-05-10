@@ -1,0 +1,410 @@
+{% extends "market/base.html" %}
+{% block title %}Crops — Mud2Meal{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* PAGE HEADER */
+    .page-header {
+        background: linear-gradient(
+            to right,
+            #1a2e1a,
+            #0f1f0f
+        );
+        border: 1px solid #2d5a1b;
+        border-radius: 16px;
+        padding: 30px 40px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .page-header p {
+        color: #888;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    /* SEARCH & FILTER */
+    .filter-wrap {
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .filter-group label {
+        display: block;
+        color: #888;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        padding: 10px 14px;
+        background: #0f1f0f;
+        border: 1px solid #2d5a1b;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+        border-color: #5cb85c;
+    }
+
+    .filter-group select option {
+        background: #0f1f0f;
+    }
+
+    .btn-search {
+        padding: 10px 24px;
+        background: #5cb85c;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+        height: 40px;
+    }
+
+    .btn-search:hover { background: #4cae4c; }
+
+    .btn-clear {
+        padding: 10px 24px;
+        background: transparent;
+        color: #888;
+        border: 1px solid #2d5a1b;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        height: 40px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-clear:hover {
+        color: #fff;
+        border-color: #5cb85c;
+    }
+
+    /* RESULTS INFO */
+    .results-info {
+        color: #888;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .results-info span { color: #5cb85c; }
+
+    /* CROP GRID */
+    .crop-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .crop-card {
+        background: #1a2e1a;
+        border: 1px solid #2d5a1b;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .crop-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(92,184,92,0.2);
+    }
+
+    .crop-card img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+    }
+
+    .crop-card-placeholder {
+        width: 100%;
+        height: 160px;
+        background: #243824;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+    }
+
+    .crop-card-body {
+        padding: 14px;
+    }
+
+    .crop-card-body h3 {
+        font-size: 16px;
+        color: #fff;
+        margin-bottom: 6px;
+    }
+
+    .crop-price {
+        color: #5cb85c;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .crop-farmer {
+        color: #888;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .crop-location {
+        color: #666;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .crop-category {
+        display: inline-block;
+        background: #0f1f0f;
+        border: 1px solid #2d5a1b;
+        color: #5cb85c;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        margin-top: 8px;
+    }
+
+    .crop-quantity {
+        color: #666;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    /* NO RESULTS */
+    .no-results {
+        text-align: center;
+        padding: 80px 20px;
+        color: #888;
+        grid-column: span 4;
+    }
+
+    .no-results .icon {
+        font-size: 60px;
+        margin-bottom: 16px;
+    }
+
+    .no-results h3 {
+        color: #fff;
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    /* PAGINATION */
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 2rem;
+        width: 100%;
+    }
+
+    .page-btn {
+        padding: 10px 18px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        color: #ccc;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .page-btn:hover {
+        background: rgba(247,151,30,0.15);
+        border-color: #f7971e;
+        color: #f7971e;
+    }
+
+    .page-btn.active {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        border-color: transparent;
+        color: #000;
+        font-weight: bold;
+    }
+
+    .page-btn.disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div>
+        <h1>🌾 All Crops</h1>
+        <p>Fresh crops directly from local farmers</p>
+    </div>
+</div>
+
+<!-- SEARCH & FILTER -->
+<form method="GET">
+    <div class="filter-wrap">
+        <div class="filter-group">
+            <label>🔍 Search Crop</label>
+            <input type="text" name="q"
+                   value="{{ query }}"
+                   placeholder="Search by crop name...">
+        </div>
+
+        <div class="filter-group">
+            <label>🌿 Category</label>
+            <select name="category">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}"
+                    {% if category == cat.id|stringformat:"s" %}
+                    selected {% endif %}>
+                    {{ cat.icon }} {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>📍 District</label>
+            <select name="district">
+                <option value="">All Districts</option>
+                {% for d in districts %}
+                {% if d %}
+                <option value="{{ d }}"
+                    {% if district == d %}selected{% endif %}>
+                    {{ d }}
+                </option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn-search">
+            Search
+        </button>
+        <a href="/crops/" class="btn-clear">Clear</a>
+    </div>
+</form>
+
+<!-- RESULTS INFO -->
+<div class="results-info">
+    Showing <span>{{ crops.start_index }}–{{ crops.end_index }}</span>
+    of <span>{{ crops.paginator.count }}</span> crops
+    {% if query %} for "<span>{{ query }}</span>"{% endif %}
+    {% if district %} in <span>{{ district }}</span>{% endif %}
+</div>
+
+<!-- CROP GRID -->
+<div class="crop-grid">
+    {% for crop in crops %}
+    <a href="/crop/{{ crop.id }}/" class="crop-card">
+       {% if crop.photo %}
+            <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
+        {% else %}
+            <div class="crop-card-placeholder">
+                {% if crop.category %}
+                    {{ crop.category.icon }}
+                {% else %}
+                    🌾
+                {% endif %}
+            </div>
+        {% endif %}
+        <div class="crop-card-body">
+            <h3>{{ crop.name }}</h3>
+            <div class="crop-price">
+                ₹{{ crop.price }}/{{ crop.get_unit_display }}
+            </div>
+            {% if crop.quantity %}
+            <div class="crop-quantity">
+                📦 Available: {{ crop.quantity }}
+            </div>
+            {% endif %}
+            <div class="crop-farmer">
+                👨‍🌾 {{ crop.farmer.user.get_full_name }}
+            </div>
+            <div class="crop-location">
+                📍 {{ crop.district }}, {{ crop.state }}
+            </div>
+            {% if crop.category %}
+            <span class="crop-category">
+                {{ crop.category.icon }} {{ crop.category.name }}
+            </span>
+            {% endif %}
+        </div>
+    </a>
+    {% empty %}
+    <div class="no-results">
+        <div class="icon">🌾</div>
+        <h3>No crops found</h3>
+        <p>Try different search terms or filters</p>
+    </div>
+    {% endfor %}
+
+</div>  {# ← closes .crop-grid here #}
+
+<!-- PAGINATION -->
+{% if crops.has_other_pages %}
+<div class="pagination">
+
+    {% if crops.has_previous %}
+    <a href="?page={{ crops.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if district %}&district={{ district }}{% endif %}" class="page-btn">← Previous</a>
+    {% else %}
+    <span class="page-btn disabled">← Previous</span>
+    {% endif %}
+
+    {% for num in crops.paginator.page_range %}
+        {% if crops.number == num %}
+        <span class="page-btn active">{{ num }}</span>
+        {% elif num > crops.number|add:'-3' and num < crops.number|add:'3' %}
+        <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if district %}&district={{ district }}{% endif %}" class="page-btn">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if crops.has_next %}
+    <a href="?page={{ crops.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if district %}&district={{ district }}{% endif %}" class="page-btn">Next →</a>
+    {% else %}
+    <span class="page-btn disabled">Next →</span>
+    {% endif %}
+
+</div>
+{% endif %}
+
+{% endblock %}

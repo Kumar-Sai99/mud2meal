@@ -1,0 +1,291 @@
+{% extends "market/base.html" %}
+{% block title %}Buyer Dashboard — Mud2Meal{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* HEADER */
+    .dashboard-header {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 30px 40px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .dashboard-header h1 {
+        font-size: 26px;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .dashboard-header p {
+        color: #888;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .btn-browse {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #000;
+        padding: 10px 24px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+        transition: opacity 0.2s;
+    }
+
+    .btn-browse:hover { opacity: 0.9; }
+
+    /* STATS */
+    .stats {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 140px;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .stat-card .number {
+        font-size: 36px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stat-card .label {
+        font-size: 13px;
+        color: #888;
+        margin-top: 6px;
+    }
+
+    /* ENQUIRY CARDS */
+    .enquiries-wrap {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .section-header {
+        padding: 20px 28px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .enquiry-card {
+        margin: 16px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        padding: 20px;
+        transition: border 0.2s;
+    }
+
+    .enquiry-card:hover {
+        border-color: rgba(247,151,30,0.3);
+    }
+
+    .enquiry-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .enquiry-crop-name {
+        font-size: 17px;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .enquiry-price {
+        background: linear-gradient(135deg, #56ab2f, #a8e063);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .enquiry-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 12px;
+    }
+
+    .enquiry-meta span {
+        color: #888;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .enquiry-message {
+        background: rgba(255,255,255,0.03);
+        border-left: 3px solid #f7971e;
+        border-radius: 0 8px 8px 0;
+        padding: 12px 16px;
+        color: #ccc;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-top: 12px;
+    }
+
+    .enquiry-date {
+        color: #555;
+        font-size: 12px;
+        margin-top: 10px;
+        text-align: right;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 60px 20px;
+        color: #888;
+    }
+
+    .no-data .icon {
+        font-size: 50px;
+        margin-bottom: 16px;
+    }
+
+    .no-data h3 {
+        color: #fff;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    .no-data p {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="dashboard-header">
+    <div>
+        <h1>🛒 Buyer Dashboard</h1>
+        <p>Welcome back, {{ request.user.get_full_name }}!</p>
+    </div>
+    <a href="/crops/" class="btn-browse">
+        🌾 Browse Crops
+    </a>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat-card">
+        <div class="number">{{ total_enquiries }}</div>
+        <div class="label">📩 Total Enquiries Sent</div>
+    </div>
+    <div class="stat-card">
+        <div class="number">{{ enquiries|length }}</div>
+        <div class="label">🌾 Crops Contacted</div>
+    </div>
+</div>
+
+<!-- MY ENQUIRIES -->
+<div class="enquiries-wrap">
+    <div class="section-header">
+        📩 My Enquiries
+    </div>
+
+    {% if enquiries %}
+        {% for enquiry in enquiries %}
+        <div class="enquiry-card">
+            <div class="enquiry-top">
+                <div class="enquiry-crop-name">
+                    🌾 {{ enquiry.crop.name }}
+                </div>
+                <div class="enquiry-price">
+                    ₹{{ enquiry.crop.price }}/{{ enquiry.crop.get_unit_display }}
+                </div>
+            </div>
+
+            <div class="enquiry-meta">
+                <span>👨‍🌾 {{ enquiry.crop.farmer.user.get_full_name }}</span>
+                <span>📍 {{ enquiry.crop.district }}, {{ enquiry.crop.state }}</span>
+                <span>📞 Your Phone: {{ enquiry.phone }}</span>
+            </div>
+
+            <div class="enquiry-message">
+                💬 {{ enquiry.message }}
+            </div>
+
+            <div class="enquiry-date">
+                🕐 {{ enquiry.created|date:"d M Y, h:i A" }}
+            </div>
+            
+
+            <!-- FARMER REPLY -->
+            {% if enquiry.reply %}
+            <div style="background:rgba(86,171,47,0.08);
+                        border:1px solid rgba(86,171,47,0.2);
+                        border-radius:10px; padding:14px;
+                        margin-top:12px;">
+                <div style="color:#a8e063; font-size:13px;
+                            font-weight:bold; margin-bottom:6px;">
+                    👨‍🌾 Farmer's Reply:
+                </div>
+                <div style="color:#ccc; font-size:13px; line-height:1.6;">
+                    {{ enquiry.reply.message }}
+                </div>
+                <div style="color:#666; font-size:11px; margin-top:6px;">
+                    🕐 {{ enquiry.reply.created|date:"d M Y, h:i A" }}
+                </div>
+            </div>
+            {% else %}
+            <div style="color:#666; font-size:12px;
+                        margin-top:10px; font-style:italic;">
+                ⏳ Waiting for farmer's reply...
+            </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+    {% else %}
+    <div class="no-data">
+        <div class="icon">📩</div>
+        <h3>No Enquiries Yet</h3>
+        <p>Browse crops and contact farmers directly!</p>
+        <a href="/crops/" class="btn-browse">
+            🌾 Browse Crops
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
