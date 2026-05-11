@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Crop, Category, FarmerProfile, BuyerProfile, Enquiry, EnquiryReply
 from .forms import RegisterForm, LoginForm, CropForm, EnquiryForm, FarmerProfileForm, BuyerProfileForm
+from .models import ChatRoom
 
 
 # ── HOME ─────────────────────────────────────────────
@@ -286,12 +287,14 @@ def farmer_dashboard(request):
     sold_crops      = crops.filter(status='sold').count()
     total_enquiries = enquiries.count()
     unread          = enquiries.filter(is_read=False).count()
+    chats = ChatRoom.objects.filter(farmer=farmer).select_related('buyer__user', 'crop').order_by('-created')
 
     return render(request, 'market/farmer_dashboard.html', {
         'farmer'         : farmer,
         'crops'          : crops,
         'categories'     : categories,
         'enquiries'      : enquiries,
+        'chats'          : chats,   
         'crop_form'      : CropForm(),
         'total_crops'    : total_crops,
         'available_crops': available_crops,
@@ -386,7 +389,6 @@ def edit_crop(request, pk):
         'categories': Category.objects.all(),
     })
 
-# ── CHAT ROOM ─────────────────────────────────────────
 @login_required
 def chat_room(request, room_id):
     from .models import ChatRoom, ChatMessage
@@ -395,21 +397,23 @@ def chat_room(request, room_id):
     except:
         return redirect('/home/')
 
-    # only farmer or buyer of this room can access
     user = request.user
+
+    # allow both farmer AND buyer of this room
     is_farmer = hasattr(user, 'farmer') and user.farmer == room.farmer
     is_buyer  = hasattr(user, 'buyer')  and user.buyer  == room.buyer
 
     if not is_farmer and not is_buyer:
+        messages.error(request, "You don't have access to this chat!")
         return redirect('/home/')
 
-    messages = ChatMessage.objects.filter(
+    messages_qs = ChatMessage.objects.filter(
         room=room
     ).select_related('sender').order_by('timestamp')
 
     return render(request, 'market/chat_room.html', {
         'room'    : room,
-        'messages': messages,
+        'messages': messages_qs,
         'user'    : user,
     })
 
@@ -419,16 +423,35 @@ def start_chat(request, crop_pk):
     from .models import ChatRoom
     crop = get_object_or_404(Crop, pk=crop_pk)
 
+    # get buyer — if user is farmer, redirect to their chats
     try:
         buyer = request.user.buyer
     except:
         messages.error(request, "Only buyers can start a chat!")
         return redirect(f'/crop/{crop_pk}/')
 
-    # get or create chat room
+    # get or create chat room between this buyer and crop's farmer
     room, created = ChatRoom.objects.get_or_create(
         farmer = crop.farmer,
         buyer  = buyer,
         crop   = crop,
+    )
+    return redirect(f'/chat/{room.pk}/')
+
+@login_required
+def farmer_start_chat(request, enquiry_pk):
+    from .models import ChatRoom
+    try:
+        farmer = request.user.farmer
+    except:
+        return redirect('/home/')
+
+    enquiry = get_object_or_404(Enquiry, pk=enquiry_pk, crop__farmer=farmer)
+
+    # get or create chat room for this enquiry
+    room, created = ChatRoom.objects.get_or_create(
+        farmer = farmer,
+        buyer  = enquiry.buyer,
+        crop   = enquiry.crop,
     )
     return redirect(f'/chat/{room.pk}/')

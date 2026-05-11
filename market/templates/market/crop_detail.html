@@ -5,11 +5,7 @@
 <style>
     /* HERO */
     .crop-hero {
-        background: linear-gradient(
-            to right,
-            #1a2e1a,
-            #0f1f0f
-        );
+        background: linear-gradient(to right, #1a2e1a, #0f1f0f);
         border: 1px solid #2d5a1b;
         border-radius: 16px;
         padding: 40px;
@@ -19,7 +15,6 @@
         align-items: flex-start;
         flex-wrap: wrap;
     }
-
     .crop-image {
         width: 280px;
         height: 280px;
@@ -28,7 +23,6 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         flex-shrink: 0;
     }
-
     .crop-image-placeholder {
         width: 280px;
         height: 280px;
@@ -40,9 +34,7 @@
         font-size: 80px;
         flex-shrink: 0;
     }
-
     .crop-info { flex: 1; min-width: 260px; }
-
     .crop-category-badge {
         display: inline-block;
         background: #0f1f0f;
@@ -53,28 +45,24 @@
         font-size: 13px;
         margin-bottom: 12px;
     }
-
     .crop-name {
         font-size: 36px;
         font-weight: 900;
         color: #fff;
         margin-bottom: 10px;
     }
-
     .crop-price-big {
         font-size: 32px;
         font-weight: bold;
         color: #5cb85c;
         margin-bottom: 20px;
     }
-
     .crop-meta {
         display: flex;
         flex-direction: column;
         gap: 10px;
         margin-bottom: 24px;
     }
-
     .crop-meta-item {
         display: flex;
         align-items: center;
@@ -82,11 +70,7 @@
         color: #aaa;
         font-size: 14px;
     }
-
-    .crop-meta-item span:first-child {
-        font-size: 18px;
-    }
-
+    .crop-meta-item span:first-child { font-size: 18px; }
     .crop-status {
         display: inline-block;
         padding: 4px 14px;
@@ -94,20 +78,16 @@
         font-size: 13px;
         font-weight: bold;
     }
-
     .status-available {
         background: rgba(92,184,92,0.2);
         color: #5cb85c;
         border: 1px solid #5cb85c;
     }
-
     .status-sold {
         background: rgba(220,53,69,0.2);
         color: #ff6b6b;
         border: 1px solid #ff6b6b;
     }
-
-    /* DESCRIPTION */
     .crop-desc {
         background: #0f1f0f;
         border-left: 3px solid #5cb85c;
@@ -118,7 +98,6 @@
         line-height: 1.8;
         margin-bottom: 24px;
     }
-
     /* FARMER CARD */
     .farmer-card {
         background: #1a2e1a;
@@ -127,7 +106,6 @@
         padding: 24px;
         margin-bottom: 30px;
     }
-
     .farmer-card-title {
         font-size: 16px;
         font-weight: bold;
@@ -136,14 +114,12 @@
         border-left: 3px solid #5cb85c;
         padding-left: 10px;
     }
-
     .farmer-info {
         display: flex;
         align-items: center;
         gap: 16px;
         margin-bottom: 16px;
     }
-
     .farmer-photo {
         width: 60px;
         height: 60px;
@@ -151,7 +127,6 @@
         object-fit: cover;
         border: 2px solid #5cb85c;
     }
-
     .farmer-photo-placeholder {
         width: 60px;
         height: 60px;
@@ -163,19 +138,16 @@
         font-size: 28px;
         border: 2px solid #5cb85c;
     }
-
     .farmer-name {
         font-size: 18px;
         font-weight: bold;
         color: #fff;
     }
-
     .farmer-location {
         color: #888;
         font-size: 13px;
         margin-top: 4px;
     }
-
     .farmer-verified {
         display: inline-block;
         background: rgba(92,184,92,0.2);
@@ -185,7 +157,6 @@
         font-size: 11px;
         margin-top: 4px;
     }
-
     /* ENQUIRY FORM */
     .enquiry-card {
         background: #1a2e1a;
@@ -194,7 +165,6 @@
         padding: 24px;
         margin-bottom: 30px;
     }
-
     .enquiry-title {
         font-size: 16px;
         font-weight: bold;
@@ -203,18 +173,13 @@
         border-left: 3px solid #5cb85c;
         padding-left: 10px;
     }
-
-    .form-group {
-        margin-bottom: 14px;
-    }
-
+    .form-group { margin-bottom: 14px; }
     .form-group label {
         display: block;
         color: #888;
         font-size: 13px;
         margin-bottom: 6px;
     }
-
     .form-group input,
     .form-group textarea {
         width: 100%;
@@ -228,12 +193,8 @@
         transition: border 0.2s;
         resize: vertical;
     }
-
     .form-group input:focus,
-    .form-group textarea:focus {
-        border-color: #5cb85c;
-    }
-
+    .form-group textarea:focus { border-color: #5cb85c; }
     .btn-enquire {
         width: 100%;
         padding: 12px;
@@ -246,21 +207,32 @@
         cursor: pointer;
         transition: background 0.2s;
     }
-
     .btn-enquire:hover { background: #4cae4c; }
-
+    .btn-chat {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #56ab2f, #a8e063);
+        color: #000;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+        text-decoration: none;
+        margin-top: 12px;
+        font-size: 15px;
+        transition: opacity 0.2s;
+    }
+    .btn-chat:hover { opacity: 0.9; }
     .login-prompt {
         text-align: center;
         padding: 20px;
         color: #888;
         font-size: 14px;
     }
-
     .login-prompt a {
         color: #5cb85c;
         text-decoration: none;
     }
-
     /* RELATED CROPS */
     .related-grid {
         display: grid;
@@ -268,7 +240,6 @@
         gap: 16px;
         margin-top: 16px;
     }
-
     .crop-card {
         background: #1a2e1a;
         border: 1px solid #2d5a1b;
@@ -279,15 +250,12 @@
         color: inherit;
         display: block;
     }
-
     .crop-card:hover { transform: translateY(-4px); }
-
     .crop-card img {
         width: 100%;
         height: 120px;
         object-fit: cover;
     }
-
     .crop-card-placeholder {
         width: 100%;
         height: 120px;
@@ -297,21 +265,17 @@
         justify-content: center;
         font-size: 36px;
     }
-
     .crop-card-body { padding: 12px; }
-
     .crop-card-body h3 {
         font-size: 14px;
         color: #fff;
         margin-bottom: 4px;
     }
-
     .crop-price {
         color: #5cb85c;
         font-weight: bold;
         font-size: 14px;
     }
-
     .success-msg {
         background: rgba(92,184,92,0.15);
         border: 1px solid rgba(92,184,92,0.3);
@@ -322,7 +286,6 @@
         margin-bottom: 16px;
         text-align: center;
     }
-
     /* LAYOUT */
     .detail-layout {
         display: grid;
@@ -330,11 +293,8 @@
         gap: 24px;
         align-items: start;
     }
-
     @media (max-width: 900px) {
-        .detail-layout {
-            grid-template-columns: 1fr;
-        }
+        .detail-layout { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -344,10 +304,8 @@
 {% if error %}
 <div style="background:rgba(220,53,69,0.15);
             border:1px solid rgba(220,53,69,0.3);
-            color:#ff6b6b;
-            padding:10px 16px;
-            border-radius:8px;
-            font-size:13px;
+            color:#ff6b6b; padding:10px 16px;
+            border-radius:8px; font-size:13px;
             margin-bottom:16px;">
     ⚠️ {{ error }}
 </div>
@@ -355,42 +313,29 @@
 
 <!-- BACK BUTTON -->
 <div style="margin-bottom:20px;">
-    <a href="/crops/"
-       style="color:#5cb85c; text-decoration:none; font-size:14px;">
+    <a href="/crops/" style="color:#5cb85c; text-decoration:none; font-size:14px;">
         ← Back to Crops
     </a>
 </div>
 
 <!-- CROP HERO -->
 <div class="crop-hero">
-    <!-- IMAGE -->
     {% if crop.photo %}
-        <img src="{{ crop.photo.url }}"
-             alt="{{ crop.name }}"
-             class="crop-image">
+        <img src="{{ crop.photo.url }}" alt="{{ crop.name }}" class="crop-image">
     {% else %}
         <div class="crop-image-placeholder">
-            {% if crop.category %}
-                {{ crop.category.icon }}
-            {% else %}
-                🌾
-            {% endif %}
+            {{ crop.category.icon|default:"🌾" }}
         </div>
     {% endif %}
 
-    <!-- INFO -->
     <div class="crop-info">
         {% if crop.category %}
         <div class="crop-category-badge">
             {{ crop.category.icon }} {{ crop.category.name }}
         </div>
         {% endif %}
-
         <div class="crop-name">{{ crop.name }}</div>
-        <div class="crop-price-big">
-            ₹{{ crop.price }} / {{ crop.get_unit_display }}
-        </div>
-
+        <div class="crop-price-big">₹{{ crop.price }} / {{ crop.get_unit_display }}</div>
         <div class="crop-meta">
             {% if crop.quantity %}
             <div class="crop-meta-item">
@@ -414,7 +359,6 @@
                 </span>
             </div>
         </div>
-
         {% if crop.description %}
         <div class="crop-desc">{{ crop.description }}</div>
         {% endif %}
@@ -456,14 +400,14 @@
         </div>
     </div>
 
-    <!-- RIGHT — ENQUIRY FORM -->
+    <!-- RIGHT — ENQUIRY + CHAT -->
     <div>
         <div class="enquiry-card">
             <div class="enquiry-title">📩 Contact Farmer</div>
 
             {% if success %}
             <div class="success-msg">
-                ✅ Enquiry sent successfully! Farmer will contact you soon.
+                ✅ Enquiry sent! Farmer will contact you soon.
             </div>
             {% endif %}
 
@@ -485,12 +429,19 @@
                         📩 Send Enquiry
                     </button>
                 </form>
+
+                <!-- Chat button — only for buyers who already sent enquiry -->
+                {% if has_enquiry and user.buyer %}
+                <a href="/start-chat/{{ crop.pk }}/" class="btn-chat">
+                    💬 Chat with Farmer
+                </a>
+                {% endif %}
+
             {% else %}
                 <div class="login-prompt">
                     <p>Please <a href="/login/">login</a> to contact the farmer</p>
                     <p style="margin-top:8px;">
-                        New user?
-                        <a href="/register/">Register here</a>
+                        New user? <a href="/register/">Register here</a>
                     </p>
                 </div>
             {% endif %}
@@ -499,13 +450,9 @@
 
 </div>
 
-
-
 <!-- RELATED CROPS -->
 {% if related %}
-<div style="margin-top:40px;
-            border-top:1px solid #2d5a1b;
-            padding-top:30px;">
+<div style="margin-top:40px; border-top:1px solid #2d5a1b; padding-top:30px;">
     <div class="section-title">
         🌿 More {{ crop.category.name }} Crops
     </div>
@@ -516,8 +463,7 @@
                 <img src="{{ r.photo.url }}" alt="{{ r.name }}">
             {% else %}
                 <div class="crop-card-placeholder">
-                    {% if r.category %}{{ r.category.icon }}
-                    {% else %}🌾{% endif %}
+                    {{ r.category.icon|default:"🌾" }}
                 </div>
             {% endif %}
             <div class="crop-card-body">

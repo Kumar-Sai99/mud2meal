@@ -2,6 +2,7 @@
 {% block title %}Farmer Dashboard — Mud2Meal{% endblock %}
 
 {% block extra_head %}
+
 <style>
     /* DASHBOARD HEADER */
     .dashboard-header {
@@ -527,6 +528,32 @@
         </span>
     </div>
 
+    {% for enquiry in enquiries %}
+<div class="enquiry-card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <div style="color:#fff; font-weight:bold;">
+                🛒 {{ enquiry.buyer.user.get_full_name }}
+            </div>
+            <div style="color:#888; font-size:13px;">
+                Crop: {{ enquiry.crop.name }}
+            </div>
+            <div style="color:#aaa; font-size:13px; margin-top:6px;">
+                {{ enquiry.message }}
+            </div>
+        </div>
+
+        <!-- Open Chat button — only after enquiry exists -->
+        <a href="/farmer-start-chat/{{ enquiry.pk }}/"
+           style="background:#5cb85c; color:#fff; padding:8px 16px;
+                  border-radius:8px; text-decoration:none;
+                  font-weight:bold; white-space:nowrap;">
+            💬 Open Chat
+        </a>
+    </div>
+</div>
+{% endfor %}
+
     {% if enquiries %}
         {% for enquiry in enquiries %}
         <div style="margin:16px; background:rgba(255,255,255,0.03);
@@ -657,6 +684,31 @@
     </div>
     {% endif %}
 </div>
+
+
+<!-- CHATS FROM BUYERS -->
+<div class="section-title">💬 Chats from Buyers</div>
+{% for chat in chats %}
+<div style="background:#1a2e1a; border:1px solid #2d5a1b;
+            border-radius:10px; padding:16px; margin-bottom:12px;
+            display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <div style="color:#fff; font-weight:bold;">
+            🛒 {{ chat.buyer.user.get_full_name }}
+        </div>
+        <div style="color:#888; font-size:13px;">
+            Crop: {{ chat.crop.name }}
+        </div>
+    </div>
+    <a href="/chat/{{ chat.pk }}/"
+       style="background:#5cb85c; color:#fff; padding:8px 16px;
+              border-radius:8px; text-decoration:none; font-weight:bold;">
+        💬 Open Chat
+    </a>
+</div>
+{% empty %}
+<p style="color:#888;">No chats yet.</p>
+{% endfor %}
 
 <script>
 function toggleReply(id) {
