@@ -15,18 +15,27 @@
         padding: 16px 20px;
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: 12px;
     }
-    .chat-header h3 {
-        color: #fff;
-        margin: 0;
-        font-size: 16px;
+    .chat-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
-    .chat-header p {
-        color: #888;
-        margin: 0;
+    .chat-header h3 { color: #fff; margin: 0; font-size: 16px; }
+    .chat-header p  { color: #888; margin: 0; font-size: 13px; }
+    .btn-back {
+        background: transparent;
+        border: 1px solid #2d5a1b;
+        color: #5cb85c;
+        padding: 6px 16px;
+        border-radius: 8px;
+        text-decoration: none;
         font-size: 13px;
+        white-space: nowrap;
     }
+    .btn-back:hover { background: #2d5a1b; }
     .chat-box {
         background: #0f1f0f;
         border: 1px solid #2d5a1b;
@@ -89,9 +98,7 @@
         font-size: 14px;
         outline: none;
     }
-    .chat-input input:focus {
-        border-color: #5cb85c;
-    }
+    .chat-input input:focus { border-color: #5cb85c; }
     .send-btn {
         background: #5cb85c;
         color: #fff;
@@ -108,24 +115,39 @@
         color: #5cb85c;
         text-align: center;
         padding: 6px;
+        background: #0f1f0f;
+        border-left: 1px solid #2d5a1b;
+        border-right: 1px solid #2d5a1b;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="chat-container">
+
+    <!-- HEADER WITH BACK BUTTON -->
     <div class="chat-header">
-        <span style="font-size:32px">💬</span>
-        <div>
-            <h3>{{ room.crop.name }}</h3>
-            <p>
-                👨‍🌾 {{ room.farmer.user.get_full_name }}
-                &nbsp;↔&nbsp;
-                🛒 {{ room.buyer.user.get_full_name }}
-            </p>
+        <div class="chat-header-left">
+            <span style="font-size:32px">💬</span>
+            <div>
+                <h3>{{ room.crop.name }}</h3>
+                <p>
+                    👨‍🌾 {{ room.farmer.user.get_full_name }}
+                    &nbsp;↔&nbsp;
+                    🛒 {{ room.buyer.user.get_full_name }}
+                </p>
+            </div>
         </div>
+
+        <!-- BACK BUTTON -->
+        {% if user.farmer %}
+        <a href="/farmer-dashboard/" class="btn-back">← Back to Dashboard</a>
+        {% else %}
+        <a href="/buyer-dashboard/" class="btn-back">← Back to Dashboard</a>
+        {% endif %}
     </div>
 
+    <!-- CHAT MESSAGES -->
     <div class="chat-box" id="chat-box">
         {% for msg in messages %}
         <div class="message {% if msg.sender == user %}mine{% else %}theirs{% endif %}">
@@ -142,6 +164,7 @@
 
     <div id="status" class="status">Connecting...</div>
 
+    <!-- CHAT INPUT -->
     <div class="chat-input">
         <input type="text" id="message-input"
                placeholder="Type a message..."
@@ -157,7 +180,6 @@
     const input    = document.getElementById('message-input');
     const status   = document.getElementById('status');
 
-    // scroll to bottom
     function scrollBottom() {
         chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -179,17 +201,21 @@
     ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         if (data.type === 'new_message') {
-            addMessage(data.sender, data.message, '');
+            addMessage(data.sender, data.message, 'Just now');
         }
     };
 
     function addMessage(sender, message, time) {
+        // remove "no messages" placeholder if present
+        const empty = chatBox.querySelector('p');
+        if (empty) empty.remove();
+
         const div = document.createElement('div');
         div.className = `message ${sender === username ? 'mine' : 'theirs'}`;
         div.innerHTML = `
             <div class="sender">${sender}</div>
             ${message}
-            <div class="time">${time || 'Just now'}</div>
+            <div class="time">${time}</div>
         `;
         chatBox.appendChild(div);
         scrollBottom();
@@ -202,7 +228,6 @@
         input.value = '';
     }
 
-    // send on Enter key
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });

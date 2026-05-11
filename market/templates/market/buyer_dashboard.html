@@ -289,3 +289,66 @@
 </div>
 
 {% endblock %}
+
+{% for enquiry in enquiries %}
+<div class="enquiry-card">
+    <div class="enquiry-top">
+        <div class="enquiry-crop-name">
+            🌾 {{ enquiry.crop.name }}
+        </div>
+        <div class="enquiry-price">
+            ₹{{ enquiry.crop.price }}/{{ enquiry.crop.get_unit_display }}
+        </div>
+    </div>
+
+    <div class="enquiry-meta">
+        <span>👨‍🌾 {{ enquiry.crop.farmer.user.get_full_name }}</span>
+        <span>📍 {{ enquiry.crop.district }}, {{ enquiry.crop.state }}</span>
+        <span>📞 Your Phone: {{ enquiry.phone }}</span>
+    </div>
+
+    <div class="enquiry-message">
+        💬 {{ enquiry.message }}
+    </div>
+
+    <div class="enquiry-date">
+        🕐 {{ enquiry.created|date:"d M Y, h:i A" }}
+    </div>
+
+    <!-- FARMER REPLY -->
+    {% if enquiry.reply %}
+    <div style="background:rgba(86,171,47,0.08);
+                border:1px solid rgba(86,171,47,0.2);
+                border-radius:10px; padding:14px;
+                margin-top:12px;">
+        <div style="color:#a8e063; font-size:13px;
+                    font-weight:bold; margin-bottom:6px;">
+            👨‍🌾 Farmer's Reply:
+        </div>
+        <div style="color:#ccc; font-size:13px; line-height:1.6;">
+            {{ enquiry.reply.message }}
+        </div>
+        <div style="color:#666; font-size:11px; margin-top:6px;">
+            🕐 {{ enquiry.reply.created|date:"d M Y, h:i A" }}
+        </div>
+    </div>
+    {% else %}
+    <div style="color:#666; font-size:12px;
+                margin-top:10px; font-style:italic;">
+        ⏳ Waiting for farmer's reply...
+    </div>
+    {% endif %}
+
+    <!-- CHAT BUTTON -->
+    <a href="/start-chat/{{ enquiry.crop.pk }}/"
+       style="display:inline-block; margin-top:12px;
+              padding:8px 20px;
+              background:linear-gradient(135deg,#56ab2f,#a8e063);
+              color:#000; border-radius:8px;
+              text-decoration:none; font-weight:bold;
+              font-size:13px;">
+        💬 Open Chat with Farmer
+    </a>
+
+</div>
+{% endfor %}

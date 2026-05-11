@@ -400,18 +400,21 @@
         </div>
     </div>
 
-    <!-- RIGHT — ENQUIRY + CHAT -->
-    <div>
-        <div class="enquiry-card">
-            <div class="enquiry-title">📩 Contact Farmer</div>
+ <!-- RIGHT — ENQUIRY + CHAT -->
+<div>
+    <div class="enquiry-card">
+        <div class="enquiry-title">📩 Contact Farmer</div>
 
-            {% if success %}
-            <div class="success-msg">
-                ✅ Enquiry sent! Farmer will contact you soon.
-            </div>
-            {% endif %}
+        {% if user.is_authenticated %}
 
-            {% if user.is_authenticated %}
+            {% if is_farmer %}
+                <!-- Farmer sees nothing here -->
+                <div class="login-prompt">
+                    <p>🌾 You are viewing this as a farmer.</p>
+                </div>
+
+            {% else %}
+                <!-- Buyer sees enquiry form -->
                 <form method="POST">
                     {% csrf_token %}
                     <div class="form-group">
@@ -430,24 +433,23 @@
                     </button>
                 </form>
 
-                <!-- Chat button — only for buyers who already sent enquiry -->
-                {% if has_enquiry and user.buyer %}
+                {% if has_enquiry %}
                 <a href="/start-chat/{{ crop.pk }}/" class="btn-chat">
                     💬 Chat with Farmer
                 </a>
                 {% endif %}
 
-            {% else %}
-                <div class="login-prompt">
-                    <p>Please <a href="/login/">login</a> to contact the farmer</p>
-                    <p style="margin-top:8px;">
-                        New user? <a href="/register/">Register here</a>
-                    </p>
-                </div>
             {% endif %}
-        </div>
-    </div>
 
+        {% else %}
+            <div class="login-prompt">
+                <p>Please <a href="/login/">login</a> to contact the farmer</p>
+                <p style="margin-top:8px;">
+                    New user? <a href="/register/">Register here</a>
+                </p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <!-- RELATED CROPS -->

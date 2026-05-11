@@ -186,14 +186,35 @@ def crop_detail(request, pk):
         category=crop.category, status='available'
     ).select_related('farmer__user').exclude(pk=pk)[:4]
 
+    # check if logged in user is a farmer
+    is_farmer   = False
+    has_enquiry = False
+
+    if request.user.is_authenticated:
+        try:
+            request.user.farmer
+            is_farmer = True
+        except:
+            is_farmer = False
+
+        # check if buyer already sent enquiry
+        if not is_farmer:
+            try:
+                buyer       = request.user.buyer
+                has_enquiry = Enquiry.objects.filter(
+                    crop=crop, buyer=buyer
+                ).exists()
+            except:
+                has_enquiry = False
+
     if request.method == 'POST' and request.user.is_authenticated:
         try:
             buyer = request.user.buyer
             form  = EnquiryForm(request.POST)
             if form.is_valid():
-                enquiry        = form.save(commit=False)
-                enquiry.crop   = crop
-                enquiry.buyer  = buyer
+                enquiry       = form.save(commit=False)
+                enquiry.crop  = crop
+                enquiry.buyer = buyer
                 enquiry.save()
                 messages.success(request, "Enquiry sent! Farmer will contact you soon.")
             else:
@@ -203,11 +224,12 @@ def crop_detail(request, pk):
         return redirect(f'/crop/{pk}/')
 
     return render(request, 'market/crop_detail.html', {
-        'crop'   : crop,
-        'related': related,
-        'form'   : EnquiryForm(),
+        'crop'       : crop,
+        'related'    : related,
+        'form'       : EnquiryForm(),
+        'has_enquiry': has_enquiry,
+        'is_farmer'  : is_farmer,
     })
-
 
 # ── FARMER DASHBOARD ─────────────────────────────────
 @login_required
@@ -316,12 +338,17 @@ def buyer_dashboard(request):
         buyer=buyer
     ).select_related('crop__farmer__user', 'crop__category').prefetch_related('reply').order_by('-created')
 
+    # get all chat rooms for this buyer
+    chat_rooms = ChatRoom.objects.filter(
+        buyer=buyer
+    ).select_related('farmer__user', 'crop').order_by('-created')
+
     return render(request, 'market/buyer_dashboard.html', {
         'buyer'          : buyer,
         'enquiries'      : enquiries,
         'total_enquiries': enquiries.count(),
+        'chat_rooms'     : chat_rooms,
     })
-
 
 # ── EDIT PROFILE ─────────────────────────────────────
 @login_required
