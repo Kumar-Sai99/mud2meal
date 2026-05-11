@@ -33,4 +33,4 @@ def notify_farmer_on_enquiry(sender, instance, created, **kwargs):
         print(f"   Buyer  : {buyer_user.username}")
         print(f"   Crop   : {crop_name}")
         print(f"   Message: {instance.message[:50]}...")
-        print(f"   Phone  : {instance.phone}\n")
+        print(f"   Phone  : {instance.phone}\n")x
