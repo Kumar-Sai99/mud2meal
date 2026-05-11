@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework', 
     'market.apps.MarketConfig',
 ]
 
@@ -146,3 +147,12 @@ SESSION_COOKIE_AGE = 1800  # 30 minutes
 
 # Custom login URL
 LOGIN_URL = '/login/'
+
+# DRF settings
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
