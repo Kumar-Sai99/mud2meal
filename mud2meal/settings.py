@@ -143,3 +143,6 @@ MESSAGE_TAGS = {
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800  # 30 minutes
+
+# Custom login URL
+LOGIN_URL = '/login/'

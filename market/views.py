@@ -2,20 +2,25 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from .models import Crop, Category, FarmerProfile, BuyerProfile, Enquiry, EnquiryReply
 from django.contrib import messages
 from django.core.paginator import Paginator
+from .models import Crop, Category, FarmerProfile, BuyerProfile, Enquiry, EnquiryReply
+from .forms import RegisterForm, LoginForm, CropForm, EnquiryForm, FarmerProfileForm, BuyerProfileForm
 
 
 # ── HOME ─────────────────────────────────────────────
 def home(request):
-    featured_crops = Crop.objects.filter(is_featured=True, status='available')
+    featured_crops = Crop.objects.filter(
+        is_featured=True, status='available'
+    ).select_related('farmer__user', 'category')
+
+    all_crops = Crop.objects.filter(
+        status='available'
+    ).select_related('farmer__user', 'category')
+
     categories  = Category.objects.all()
     total_crops = Crop.objects.filter(status='available').count()
-    all_crops      = Crop.objects.filter(status='available')
 
-    
     is_farmer = False
     if request.user.is_authenticated:
         try:
@@ -26,11 +31,12 @@ def home(request):
 
     return render(request, 'market/home.html', {
         'featured_crops': featured_crops,
-        'all_crops'     : all_crops, 
+        'all_crops'     : all_crops,
         'categories'    : categories,
         'total_crops'   : total_crops,
         'is_farmer'     : is_farmer,
     })
+
 
 # ── REGISTER ─────────────────────────────────────────
 def register_view(request):
@@ -38,48 +44,42 @@ def register_view(request):
         return redirect('/home/')
 
     if request.method == 'POST':
-        username   = request.POST['username']
-        email      = request.POST['email']
-        first_name = request.POST['first_name']
-        last_name  = request.POST['last_name']
-        password1  = request.POST['password1']
-        password2  = request.POST['password2']
-        phone      = request.POST['phone']
-        district   = request.POST['district']
-        state      = request.POST['state']
-        role       = request.POST['role']
-
-        if password1 != password2:
-            messages.error(request, 'Passwords do not match!')
-            return redirect('/register/')
-
-
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username already taken!')
-            return redirect('/register/')
-
-
-        user = User.objects.create_user(
-            username=username, email=email,
-            password=password1,
-            first_name=first_name, last_name=last_name
-        )
-
-        if role == 'farmer':
-            FarmerProfile.objects.create(
-                user=user, phone=phone,
-                district=district, state=state
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            user = User.objects.create_user(
+                username   = data['username'],
+                email      = data['email'],
+                password   = data['password1'],
+                first_name = data['first_name'],
+                last_name  = data['last_name'],
             )
+            if data['role'] == 'farmer':
+                FarmerProfile.objects.create(
+                    user     = user,
+                    phone    = data['phone'],
+                    district = data['district'],
+                    state    = data['state'],
+                )
+            else:
+                BuyerProfile.objects.create(
+                    user     = user,
+                    phone    = data['phone'],
+                    district = data['district'],
+                    state    = data['state'],
+                )
+            login(request, user)
+            messages.success(request, f"Welcome {user.first_name}! Account created successfully!")
+            return redirect('/home/')
         else:
-            BuyerProfile.objects.create(
-                user=user, phone=phone,
-                district=district, state=state
-            )
+            # show first error to user
+            for field, errors in form.errors.items():
+                messages.error(request, errors[0])
+                break
+    else:
+        form = RegisterForm()
 
-        login(request, user)
-        return redirect('/home/')
-
-    return render(request, 'market/register.html')
+    return render(request, 'market/register.html', {'form': form})
 
 
 # ── LOGIN ─────────────────────────────────────────────
@@ -88,18 +88,25 @@ def login_view(request):
         return redirect('/home/')
 
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user     = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            return redirect('/home/')
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            user = authenticate(
+                request,
+                username = data['username'],
+                password = data['password'],
+            )
+            if user is not None:
+                login(request, user)
+                return redirect('/home/')
+            else:
+                messages.error(request, 'Invalid username or password!')
         else:
-            messages.error(request, 'Invalid username or password!')
-            return redirect('/login/')
+            messages.error(request, 'Please fill in all fields!')
+    else:
+        form = LoginForm()
 
-    return render(request, 'market/login.html')
+    return render(request, 'market/login.html', {'form': form})
 
 
 # ── LOGOUT ───────────────────────────────────────────
@@ -107,6 +114,13 @@ def logout_view(request):
     logout(request)
     messages.success(request, "Logged out successfully!")
     return redirect('/home/')
+
+
+# ── ROLE SELECT ──────────────────────────────────────
+def role_select(request):
+    if request.user.is_authenticated:
+        return redirect('/home/')
+    return render(request, 'market/role_select.html')
 
 
 # ── DASHBOARD ROUTER ─────────────────────────────────
@@ -131,7 +145,9 @@ def crop_list(request):
     category = request.GET.get('category', '')
     district = request.GET.get('district', '')
 
-    crops = Crop.objects.filter(status='available')
+    crops = Crop.objects.filter(
+        status='available'
+    ).select_related('farmer__user', 'category')
 
     if query:
         crops = crops.filter(name__icontains=query)
@@ -142,10 +158,12 @@ def crop_list(request):
 
     paginator = Paginator(crops, 8)
     page      = request.GET.get('page', 1)
-    crops     = paginator.get_page(page) 
+    crops     = paginator.get_page(page)
 
-    categories = Category.objects.all()
-    raw_districts = Crop.objects.filter(status='available').values_list('district', flat=True)
+    categories    = Category.objects.all()
+    raw_districts = Crop.objects.filter(
+        status='available'
+    ).values_list('district', flat=True)
     districts = sorted(set(d.strip() for d in raw_districts if d.strip()))
 
     return render(request, 'market/crop_list.html', {
@@ -160,31 +178,33 @@ def crop_list(request):
 
 # ── CROP DETAIL ──────────────────────────────────────
 def crop_detail(request, pk):
-    crop    = get_object_or_404(Crop, pk=pk)
+    crop = get_object_or_404(
+        Crop.objects.select_related('farmer__user', 'category'), pk=pk
+    )
     related = Crop.objects.filter(
         category=crop.category, status='available'
-    ).exclude(pk=pk)[:4]
-    success = False
-    error   = None
+    ).select_related('farmer__user').exclude(pk=pk)[:4]
 
     if request.method == 'POST' and request.user.is_authenticated:
         try:
-            buyer   = request.user.buyer
-            message = request.POST['message']
-            phone   = request.POST['phone']
-            Enquiry.objects.create(
-                crop=crop, buyer=buyer,
-                message=message, phone=phone
-            )
-            messages.success(request, "Enquiry sent! Farmer will contact you soon.")
-            return redirect(f'/crop/{pk}/')
+            buyer = request.user.buyer
+            form  = EnquiryForm(request.POST)
+            if form.is_valid():
+                enquiry        = form.save(commit=False)
+                enquiry.crop   = crop
+                enquiry.buyer  = buyer
+                enquiry.save()
+                messages.success(request, "Enquiry sent! Farmer will contact you soon.")
+            else:
+                messages.error(request, "Please fill in all fields correctly!")
         except:
             messages.error(request, "Only buyers can send enquiries!")
-            return redirect(f'/crop/{pk}/')
+        return redirect(f'/crop/{pk}/')
 
     return render(request, 'market/crop_detail.html', {
         'crop'   : crop,
         'related': related,
+        'form'   : EnquiryForm(),
     })
 
 
@@ -196,38 +216,20 @@ def farmer_dashboard(request):
     except:
         return redirect('/home/')
 
-    success = None
-
     if request.method == 'POST':
         action = request.POST.get('action')
 
         # ADD CROP
         if action == 'add_crop':
-            name        = request.POST.get('name')
-            price       = request.POST.get('price')
-            unit        = request.POST.get('unit', 'kg')
-            quantity    = request.POST.get('quantity', '')
-            description = request.POST.get('description', '')
-            district    = request.POST.get('district', '')
-            state       = request.POST.get('state', '')
-            status      = request.POST.get('status', 'available')
-            is_featured = request.POST.get('is_featured') == '1'
-            category_id = request.POST.get('category')
-            photo       = request.FILES.get('photo')
-
-            crop = Crop(
-                farmer=farmer, name=name,
-                price=price, unit=unit,
-                quantity=quantity, description=description,
-                district=district, state=state,
-                status=status, is_featured=is_featured,
-            )
-            if category_id:
-                crop.category = Category.objects.get(id=category_id)
-            if photo:
-                crop.photo = photo
-            crop.save()
-            messages.success(request, f"'{name}' added successfully!")
+            form = CropForm(request.POST, request.FILES)
+            if form.is_valid():
+                crop        = form.save(commit=False)
+                crop.farmer = farmer
+                crop.save()
+                messages.success(request, f"'{crop.name}' added successfully!")
+            else:
+                for field, errors in form.errors.items():
+                    messages.error(request, f"{field}: {errors[0]}")
             return redirect('/farmer-dashboard/')
 
         # DELETE CROP
@@ -238,9 +240,9 @@ def farmer_dashboard(request):
                 name = crop.name
                 crop.delete()
                 messages.success(request, f"'{name}' deleted!")
-                return redirect('/farmer-dashboard/')
             except:
-                pass
+                messages.error(request, "Crop not found!")
+            return redirect('/farmer-dashboard/')
 
         # MARK ENQUIRY READ
         elif action == 'mark_read':
@@ -250,30 +252,35 @@ def farmer_dashboard(request):
                 enquiry.is_read = True
                 enquiry.save()
                 messages.success(request, "Enquiry marked as read!")
-                return redirect('/farmer-dashboard/')
             except:
                 pass
+            return redirect('/farmer-dashboard/')
 
         # REPLY TO ENQUIRY
         elif action == 'reply_enquiry':
-            enquiry_id  = request.POST.get('enquiry_id')
-            reply_msg   = request.POST.get('reply_message')
+            enquiry_id = request.POST.get('enquiry_id')
+            reply_msg  = request.POST.get('reply_message', '').strip()
+            if not reply_msg:
+                messages.error(request, "Reply message cannot be empty!")
+                return redirect('/farmer-dashboard/')
             try:
                 enquiry         = Enquiry.objects.get(id=enquiry_id, crop__farmer=farmer)
                 enquiry.is_read = True
                 enquiry.save()
                 EnquiryReply.objects.update_or_create(
-                    enquiry=enquiry,
-                    defaults={'message': reply_msg}
+                    enquiry  = enquiry,
+                    defaults = {'message': reply_msg}
                 )
                 messages.success(request, "Reply sent to buyer!")
-                return redirect('/farmer-dashboard/')
             except:
-                pass
+                messages.error(request, "Enquiry not found!")
+            return redirect('/farmer-dashboard/')
 
-    crops           = Crop.objects.filter(farmer=farmer)
+    crops           = Crop.objects.filter(farmer=farmer).select_related('category')
     categories      = Category.objects.all()
-    enquiries       = Enquiry.objects.filter(crop__farmer=farmer).order_by('-created')
+    enquiries       = Enquiry.objects.filter(
+        crop__farmer=farmer
+    ).select_related('buyer__user', 'crop').order_by('-created')
     total_crops     = crops.count()
     available_crops = crops.filter(status='available').count()
     sold_crops      = crops.filter(status='sold').count()
@@ -285,12 +292,12 @@ def farmer_dashboard(request):
         'crops'          : crops,
         'categories'     : categories,
         'enquiries'      : enquiries,
+        'crop_form'      : CropForm(),
         'total_crops'    : total_crops,
         'available_crops': available_crops,
         'sold_crops'     : sold_crops,
         'total_enquiries': total_enquiries,
         'unread'         : unread,
-        'success'        : success,
     })
 
 
@@ -302,42 +309,39 @@ def buyer_dashboard(request):
     except:
         return redirect('/home/')
 
-    enquiries       = Enquiry.objects.filter(buyer=buyer).order_by('-created')
-    total_enquiries = enquiries.count()
+    enquiries = Enquiry.objects.filter(
+        buyer=buyer
+    ).select_related('crop__farmer__user', 'crop__category').prefetch_related('reply').order_by('-created')
 
     return render(request, 'market/buyer_dashboard.html', {
         'buyer'          : buyer,
         'enquiries'      : enquiries,
-        'total_enquiries': total_enquiries,
+        'total_enquiries': enquiries.count(),
     })
 
 
 # ── EDIT PROFILE ─────────────────────────────────────
 @login_required
 def edit_profile(request):
-    success = None
-
     if request.method == 'POST':
         user            = request.user
-        user.first_name = request.POST.get('first_name', '')
-        user.last_name  = request.POST.get('last_name', '')
-        user.email      = request.POST.get('email', '')
+        user.first_name = request.POST.get('first_name', '').strip()
+        user.last_name  = request.POST.get('last_name', '').strip()
+        user.email      = request.POST.get('email', '').strip()
         user.save()
 
-        # farmer profile
         try:
-            farmer          = user.farmer
-            farmer.phone    = request.POST.get('phone', '')
-            farmer.district = request.POST.get('district', '')
-            farmer.state    = request.POST.get('state', '')
-            farmer.farm_id  = request.POST.get('farm_id', '')
+            farmer           = user.farmer
+            farmer.phone     = request.POST.get('phone', '')
+            farmer.district  = request.POST.get('district', '')
+            farmer.state     = request.POST.get('state', '')
+            farmer.farm_id   = request.POST.get('farm_id', '')
             farmer.specialty = request.POST.get('specialty', '')
-            farmer.bio      = request.POST.get('bio', '')
+            farmer.bio       = request.POST.get('bio', '')
             farmer.save()
         except:
             pass
 
-        # buyer profile
         try:
             buyer                  = user.buyer
             buyer.phone            = request.POST.get('phone', '')
@@ -351,8 +355,10 @@ def edit_profile(request):
         messages.success(request, "Profile updated successfully!")
         return redirect('/edit-profile/')
 
-    return render(request, 'market/edit_profile.html', {'success': success})
+    return render(request, 'market/edit_profile.html')
 
+
+# ── EDIT CROP ─────────────────────────────────────────
 @login_required
 def edit_crop(request, pk):
     try:
@@ -363,29 +369,19 @@ def edit_crop(request, pk):
     crop = get_object_or_404(Crop, pk=pk, farmer=farmer)
 
     if request.method == 'POST':
-        crop.name        = request.POST.get('name', crop.name)
-        crop.price       = request.POST.get('price', crop.price)
-        crop.unit        = request.POST.get('unit', crop.unit)
-        crop.quantity    = request.POST.get('quantity', crop.quantity)
-        crop.description = request.POST.get('description', crop.description)
-        crop.district    = request.POST.get('district', crop.district)
-        crop.state       = request.POST.get('state', crop.state)
-        crop.status      = request.POST.get('status', crop.status)
-        crop.is_featured = request.POST.get('is_featured') == '1'
+        form = CropForm(request.POST, request.FILES, instance=crop)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"'{crop.name}' updated successfully!")
+            return redirect('/farmer-dashboard/')
+        else:
+            for field, errors in form.errors.items():
+                messages.error(request, f"{field}: {errors[0]}")
+    else:
+        form = CropForm(instance=crop)
 
-        category_id = request.POST.get('category')
-        if category_id:
-            crop.category = Category.objects.get(id=category_id)
-
-        photo = request.FILES.get('photo')
-        if photo:
-            crop.photo = photo
-
-        crop.save()
-        return redirect('/farmer-dashboard/')
-
-    categories = Category.objects.all()
     return render(request, 'market/edit_crop.html', {
         'crop'      : crop,
-        'categories': categories,
+        'form'      : form,
+        'categories': Category.objects.all(),
     })
