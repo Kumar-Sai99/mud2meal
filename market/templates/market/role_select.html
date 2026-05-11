@@ -1,0 +1,179 @@
+{% extends "market/base.html" %}
+{% block title %}Join Mud2Meal{% endblock %}
+
+{% block extra_head %}
+<style>
+    .role-page {
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+    .role-logo {
+        font-size: 36px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .role-logo span {
+        background: linear-gradient(135deg, #56ab2f, #a8e063);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .role-title {
+        font-size: 28px;
+        font-weight: 900;
+        color: #fff;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .role-subtitle {
+        color: #888;
+        font-size: 15px;
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    .role-cards {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .role-card {
+        width: 280px;
+        background: #1a2e1a;
+        border: 2px solid #2d5a1b;
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s;
+    }
+    .role-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(92,184,92,0.25);
+        border-color: #5cb85c;
+    }
+    .role-card.buyer-card:hover {
+        box-shadow: 0 20px 50px rgba(247,151,30,0.25);
+        border-color: #f7971e;
+    }
+    .role-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        display: block;
+    }
+    .role-name {
+        font-size: 22px;
+        font-weight: 900;
+        color: #fff;
+        margin-bottom: 12px;
+    }
+    .role-desc {
+        color: #888;
+        font-size: 14px;
+        line-height: 1.7;
+        margin-bottom: 24px;
+    }
+    .role-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 28px;
+        text-align: left;
+    }
+    .role-features li {
+        color: #aaa;
+        font-size: 13px;
+        padding: 6px 0;
+        border-bottom: 1px solid #2d5a1b;
+    }
+    .role-features li::before {
+        content: '✓ ';
+        color: #5cb85c;
+        font-weight: bold;
+    }
+    .role-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+    .farmer-btn {
+        background: linear-gradient(135deg, #56ab2f, #a8e063);
+        color: #000;
+    }
+    .buyer-btn {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #000;
+    }
+    .role-btn:hover { opacity: 0.9; }
+    .login-link {
+        margin-top: 40px;
+        color: #666;
+        font-size: 14px;
+        text-align: center;
+    }
+    .login-link a {
+        color: #5cb85c;
+        text-decoration: none;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="role-page">
+    <div class="role-logo">M<span>2</span>Meal</div>
+    <div class="role-title">How do you want to join? 🌾</div>
+    <div class="role-subtitle">Choose your role to get started</div>
+
+    <div class="role-cards">
+        <!-- FARMER CARD -->
+        <a href="/register/?role=farmer" class="role-card">
+            <span class="role-icon">👨‍🌾</span>
+            <div class="role-name">I'm a Farmer</div>
+            <div class="role-desc">
+                Sell your fresh crops directly to buyers. No middlemen, better prices.
+            </div>
+            <ul class="role-features">
+                <li>List your crops for free</li>
+                <li>Connect directly with buyers</li>
+                <li>Manage your farm dashboard</li>
+                <li>Reply to buyer enquiries</li>
+            </ul>
+            <span class="role-btn farmer-btn">Join as Farmer →</span>
+        </a>
+
+        <!-- BUYER CARD -->
+        <a href="/register/?role=buyer" class="role-card buyer-card">
+            <span class="role-icon">🛒</span>
+            <div class="role-name">I'm a Buyer</div>
+            <div class="role-desc">
+                Buy fresh crops directly from local farmers at fair prices.
+            </div>
+            <ul class="role-features">
+                <li>Browse fresh crops nearby</li>
+                <li>Filter by district & category</li>
+                <li>Contact farmers directly</li>
+                <li>Track your enquiries</li>
+            </ul>
+            <span class="role-btn buyer-btn">Join as Buyer →</span>
+        </a>
+    </div>
+
+    <div class="login-link">
+        Already have an account? <a href="/login/">Login here</a>
+    </div>
+</div>
+{% endblock %}
