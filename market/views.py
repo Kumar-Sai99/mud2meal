@@ -385,3 +385,50 @@ def edit_crop(request, pk):
         'form'      : form,
         'categories': Category.objects.all(),
     })
+
+# ── CHAT ROOM ─────────────────────────────────────────
+@login_required
+def chat_room(request, room_id):
+    from .models import ChatRoom, ChatMessage
+    try:
+        room = ChatRoom.objects.get(pk=room_id)
+    except:
+        return redirect('/home/')
+
+    # only farmer or buyer of this room can access
+    user = request.user
+    is_farmer = hasattr(user, 'farmer') and user.farmer == room.farmer
+    is_buyer  = hasattr(user, 'buyer')  and user.buyer  == room.buyer
+
+    if not is_farmer and not is_buyer:
+        return redirect('/home/')
+
+    messages = ChatMessage.objects.filter(
+        room=room
+    ).select_related('sender').order_by('timestamp')
+
+    return render(request, 'market/chat_room.html', {
+        'room'    : room,
+        'messages': messages,
+        'user'    : user,
+    })
+
+
+@login_required
+def start_chat(request, crop_pk):
+    from .models import ChatRoom
+    crop = get_object_or_404(Crop, pk=crop_pk)
+
+    try:
+        buyer = request.user.buyer
+    except:
+        messages.error(request, "Only buyers can start a chat!")
+        return redirect(f'/crop/{crop_pk}/')
+
+    # get or create chat room
+    room, created = ChatRoom.objects.get_or_create(
+        farmer = crop.farmer,
+        buyer  = buyer,
+        crop   = crop,
+    )
+    return redirect(f'/chat/{room.pk}/')

@@ -107,3 +107,35 @@ class EnquiryReply(models.Model):
 
     def __str__(self):
         return f"Reply to {self.enquiry}"
+    
+# ── CHAT ROOM ─────────────────────────────────────────
+class ChatRoom(models.Model):
+    farmer  = models.ForeignKey(FarmerProfile, on_delete=models.CASCADE, related_name='chat_rooms')
+    buyer   = models.ForeignKey(BuyerProfile,  on_delete=models.CASCADE, related_name='chat_rooms')
+    crop    = models.ForeignKey(Crop, on_delete=models.CASCADE, related_name='chat_rooms')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['farmer', 'buyer', 'crop']
+        ordering        = ['-created']
+
+    def __str__(self):
+        return f"{self.buyer.user.username} ↔ {self.farmer.user.username} — {self.crop.name}"
+
+    def get_room_name(self):
+        return f"chat_{self.pk}"
+
+
+# ── CHAT MESSAGE ──────────────────────────────────────
+class ChatMessage(models.Model):
+    room      = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    sender    = models.ForeignKey(User, on_delete=models.CASCADE)
+    message   = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read   = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.sender.username}: {self.message[:30]}"

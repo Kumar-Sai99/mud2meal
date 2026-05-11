@@ -17,6 +17,8 @@ urlpatterns = [
     path('buyer-dashboard/',    views.buyer_dashboard,  name='buyer_dashboard'),
     path('edit-profile/',       views.edit_profile,     name='edit_profile'),
     path('crop/<int:pk>/edit/', views.edit_crop,        name='edit_crop'),
+    path('chat/<int:room_id>/',  views.chat_room,  name='chat_room'),
+    path('start-chat/<int:crop_pk>/', views.start_chat, name='start_chat'),
 
     # ── API ENDPOINTS ──────────────────────────────────
     path('api/crops/',                        api_views.api_crop_list,        name='api_crop_list'),
