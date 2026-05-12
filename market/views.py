@@ -426,24 +426,21 @@ def chat_room(request, room_id):
 
     user = request.user
 
-    # allow both farmer AND buyer of this room
     is_farmer = hasattr(user, 'farmer') and user.farmer == room.farmer
     is_buyer  = hasattr(user, 'buyer')  and user.buyer  == room.buyer
 
     if not is_farmer and not is_buyer:
-        messages.error(request, "You don't have access to this chat!")
         return redirect('/home/')
 
-    messages_qs = ChatMessage.objects.filter(
+    chat_messages = ChatMessage.objects.filter(
         room=room
     ).select_related('sender').order_by('timestamp')
 
     return render(request, 'market/chat_room.html', {
-        'room'    : room,
-        'messages': messages_qs,
-        'user'    : user,
+        'room'         : room,
+        'chat_messages': chat_messages,  # ← renamed
+        'user'         : user,
     })
-
 
 @login_required
 def start_chat(request, crop_pk):

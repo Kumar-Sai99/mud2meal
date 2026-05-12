@@ -15,27 +15,10 @@
         padding: 16px 20px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-    }
-    .chat-header-left {
-        display: flex;
-        align-items: center;
         gap: 12px;
     }
     .chat-header h3 { color: #fff; margin: 0; font-size: 16px; }
     .chat-header p  { color: #888; margin: 0; font-size: 13px; }
-    .btn-back {
-        background: transparent;
-        border: 1px solid #2d5a1b;
-        color: #5cb85c;
-        padding: 6px 16px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 13px;
-        white-space: nowrap;
-    }
-    .btn-back:hover { background: #2d5a1b; }
     .chat-box {
         background: #0f1f0f;
         border: 1px solid #2d5a1b;
@@ -79,6 +62,15 @@
         margin-top: 4px;
         text-align: right;
     }
+    .status {
+        font-size: 12px;
+        color: #5cb85c;
+        text-align: center;
+        padding: 6px;
+        background: #0f1f0f;
+        border-left: 1px solid #2d5a1b;
+        border-right: 1px solid #2d5a1b;
+    }
     .chat-input {
         background: #1a2e1a;
         border: 1px solid #2d5a1b;
@@ -86,6 +78,7 @@
         border-radius: 0 0 12px 12px;
         padding: 16px;
         display: flex;
+        align-items: center;
         gap: 12px;
     }
     .chat-input input {
@@ -110,67 +103,71 @@
         font-size: 14px;
     }
     .send-btn:hover { background: #4cae4c; }
-    .status {
-        font-size: 12px;
-        color: #5cb85c;
-        text-align: center;
-        padding: 6px;
-        background: #0f1f0f;
-        border-left: 1px solid #2d5a1b;
-        border-right: 1px solid #2d5a1b;
+    .back-row {
+        margin-top: 14px;
+        display: flex;
+        justify-content: flex-start;
     }
+    .btn-back {
+        color: #5cb85c;
+        text-decoration: none;
+        font-size: 14px;
+        border: 1px solid #2d5a1b;
+        padding: 8px 18px;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+    .btn-back:hover { background: #1a2e1a; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="chat-container">
 
-    <!-- HEADER WITH BACK BUTTON -->
+    <!-- HEADER -->
     <div class="chat-header">
-        <div class="chat-header-left">
-            <span style="font-size:32px">💬</span>
-            <div>
-                <h3>{{ room.crop.name }}</h3>
-                <p>
-                    👨‍🌾 {{ room.farmer.user.get_full_name }}
-                    &nbsp;↔&nbsp;
-                    🛒 {{ room.buyer.user.get_full_name }}
-                </p>
-            </div>
+        <span style="font-size:32px">💬</span>
+        <div>
+            <h3>{{ room.crop.name }}</h3>
+            <p>
+                👨‍🌾 {{ room.farmer.user.get_full_name }}
+                &nbsp;↔&nbsp;
+                🛒 {{ room.buyer.user.get_full_name }}
+            </p>
         </div>
-
-        <!-- BACK BUTTON -->
-        {% if user.farmer %}
-        <a href="/farmer-dashboard/" class="btn-back">← Back to Dashboard</a>
-        {% else %}
-        <a href="/buyer-dashboard/" class="btn-back">← Back to Dashboard</a>
-        {% endif %}
     </div>
 
-    <!-- CHAT MESSAGES -->
+    <!-- MESSAGES -->
     <div class="chat-box" id="chat-box">
-        {% for msg in messages %}
+        {% for msg in chat_messages %}
         <div class="message {% if msg.sender == user %}mine{% else %}theirs{% endif %}">
             <div class="sender">{{ msg.sender.username }}</div>
             {{ msg.message }}
-            <div class="time">{{ msg.timestamp|date:"h:i A" }}</div>
+            <div class="time">{{ msg.timestamp|date:"h:i A, d M" }}</div>
         </div>
         {% empty %}
-        <p style="color:#666; text-align:center; margin:auto;">
+        <p id="empty-msg" style="color:#666; text-align:center; margin:auto;">
             No messages yet. Say hello! 👋
         </p>
         {% endfor %}
     </div>
 
+    <!-- STATUS -->
     <div id="status" class="status">Connecting...</div>
 
-    <!-- CHAT INPUT -->
+    <!-- INPUT -->
     <div class="chat-input">
         <input type="text" id="message-input"
                placeholder="Type a message..."
                autocomplete="off">
         <button class="send-btn" onclick="sendMessage()">Send →</button>
     </div>
+
+    <!-- BACK BUTTON — bottom left -->
+    <div class="back-row">
+        <a href="javascript:history.back()" class="btn-back">← Back</a>
+    </div>
+
 </div>
 
 <script>
@@ -180,12 +177,8 @@
     const input    = document.getElementById('message-input');
     const status   = document.getElementById('status');
 
-    function scrollBottom() {
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-    scrollBottom();
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    // connect websocket
     const ws = new WebSocket(`ws://${window.location.host}/ws/chat/${roomId}/`);
 
     ws.onopen = () => {
@@ -194,7 +187,7 @@
     };
 
     ws.onclose = () => {
-        status.textContent = '🔴 Disconnected';
+        status.textContent = '🔴 Disconnected — refresh to reconnect';
         status.style.color = '#e74c3c';
     };
 
@@ -206,8 +199,7 @@
     };
 
     function addMessage(sender, message, time) {
-        // remove "no messages" placeholder if present
-        const empty = chatBox.querySelector('p');
+        const empty = document.getElementById('empty-msg');
         if (empty) empty.remove();
 
         const div = document.createElement('div');
@@ -218,7 +210,7 @@
             <div class="time">${time}</div>
         `;
         chatBox.appendChild(div);
-        scrollBottom();
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     function sendMessage() {

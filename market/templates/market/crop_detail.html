@@ -3,7 +3,6 @@
 
 {% block extra_head %}
 <style>
-    /* HERO */
     .crop-hero {
         background: linear-gradient(to right, #1a2e1a, #0f1f0f);
         border: 1px solid #2d5a1b;
@@ -98,7 +97,6 @@
         line-height: 1.8;
         margin-bottom: 24px;
     }
-    /* FARMER CARD */
     .farmer-card {
         background: #1a2e1a;
         border: 1px solid #2d5a1b;
@@ -157,7 +155,6 @@
         font-size: 11px;
         margin-top: 4px;
     }
-    /* ENQUIRY FORM */
     .enquiry-card {
         background: #1a2e1a;
         border: 1px solid #2d5a1b;
@@ -229,11 +226,7 @@
         color: #888;
         font-size: 14px;
     }
-    .login-prompt a {
-        color: #5cb85c;
-        text-decoration: none;
-    }
-    /* RELATED CROPS */
+    .login-prompt a { color: #5cb85c; text-decoration: none; }
     .related-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -251,11 +244,7 @@
         display: block;
     }
     .crop-card:hover { transform: translateY(-4px); }
-    .crop-card img {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-    }
+    .crop-card img { width: 100%; height: 120px; object-fit: cover; }
     .crop-card-placeholder {
         width: 100%;
         height: 120px;
@@ -266,16 +255,8 @@
         font-size: 36px;
     }
     .crop-card-body { padding: 12px; }
-    .crop-card-body h3 {
-        font-size: 14px;
-        color: #fff;
-        margin-bottom: 4px;
-    }
-    .crop-price {
-        color: #5cb85c;
-        font-weight: bold;
-        font-size: 14px;
-    }
+    .crop-card-body h3 { font-size: 14px; color: #fff; margin-bottom: 4px; }
+    .crop-price { color: #5cb85c; font-weight: bold; font-size: 14px; }
     .success-msg {
         background: rgba(92,184,92,0.15);
         border: 1px solid rgba(92,184,92,0.3);
@@ -286,7 +267,6 @@
         margin-bottom: 16px;
         text-align: center;
     }
-    /* LAYOUT */
     .detail-layout {
         display: grid;
         grid-template-columns: 1fr 340px;
@@ -296,6 +276,17 @@
     @media (max-width: 900px) {
         .detail-layout { grid-template-columns: 1fr; }
     }
+    .btn-back {
+        color: #5cb85c;
+        text-decoration: none;
+        font-size: 14px;
+        border: 1px solid #2d5a1b;
+        padding: 8px 18px;
+        border-radius: 8px;
+        display: inline-block;
+        transition: background 0.2s;
+    }
+    .btn-back:hover { background: #1a2e1a; }
 </style>
 {% endblock %}
 
@@ -310,13 +301,6 @@
     ⚠️ {{ error }}
 </div>
 {% endif %}
-
-<!-- BACK BUTTON -->
-<div style="margin-bottom:20px;">
-    <a href="/crops/" style="color:#5cb85c; text-decoration:none; font-size:14px;">
-        ← Back to Crops
-    </a>
-</div>
 
 <!-- CROP HERO -->
 <div class="crop-hero">
@@ -400,56 +384,53 @@
         </div>
     </div>
 
- <!-- RIGHT — ENQUIRY + CHAT -->
-<div>
-    <div class="enquiry-card">
-        <div class="enquiry-title">📩 Contact Farmer</div>
+    <!-- RIGHT — ENQUIRY + CHAT -->
+    <div>
+        <div class="enquiry-card">
+            <div class="enquiry-title">📩 Contact Farmer</div>
 
-        {% if user.is_authenticated %}
-
-            {% if is_farmer %}
-                <!-- Farmer sees nothing here -->
-                <div class="login-prompt">
-                    <p>🌾 You are viewing this as a farmer.</p>
-                </div>
-
-            {% else %}
-                <!-- Buyer sees enquiry form -->
-                <form method="POST">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label>Your Phone Number</label>
-                        <input type="text" name="phone"
-                               placeholder="9999999999" required>
+            {% if user.is_authenticated %}
+                {% if is_farmer %}
+                    <div class="login-prompt">
+                        <p>🌾 You are viewing this as a farmer.</p>
                     </div>
-                    <div class="form-group">
-                        <label>Message to Farmer</label>
-                        <textarea name="message" rows="4"
-                                  placeholder="I am interested in buying {{ crop.name }}. Please contact me..."
-                                  required></textarea>
-                    </div>
-                    <button type="submit" class="btn-enquire">
-                        📩 Send Enquiry
-                    </button>
-                </form>
+                {% else %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>Your Phone Number</label>
+                            <input type="text" name="phone"
+                                   placeholder="9999999999" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Message to Farmer</label>
+                            <textarea name="message" rows="4"
+                                      placeholder="I am interested in buying {{ crop.name }}. Please contact me..."
+                                      required></textarea>
+                        </div>
+                        <button type="submit" class="btn-enquire">
+                            📩 Send Enquiry
+                        </button>
+                    </form>
 
-                {% if has_enquiry %}
-                <a href="/start-chat/{{ crop.pk }}/" class="btn-chat">
-                    💬 Chat with Farmer
-                </a>
+                    {% if has_enquiry %}
+                    <a href="/start-chat/{{ crop.pk }}/" class="btn-chat">
+                        💬 Chat with Farmer
+                    </a>
+                    {% endif %}
                 {% endif %}
 
+            {% else %}
+                <div class="login-prompt">
+                    <p>Please <a href="/login/">login</a> to contact the farmer</p>
+                    <p style="margin-top:8px;">
+                        New user? <a href="/register/">Register here</a>
+                    </p>
+                </div>
             {% endif %}
-
-        {% else %}
-            <div class="login-prompt">
-                <p>Please <a href="/login/">login</a> to contact the farmer</p>
-                <p style="margin-top:8px;">
-                    New user? <a href="/register/">Register here</a>
-                </p>
-            </div>
-        {% endif %}
+        </div>
     </div>
+
 </div>
 
 <!-- RELATED CROPS -->
@@ -479,5 +460,10 @@
     </div>
 </div>
 {% endif %}
+
+<!-- BACK BUTTON — bottom left -->
+<div style="margin-top:24px;">
+    <a href="javascript:history.back()" class="btn-back">← Back</a>
+</div>
 
 {% endblock %}
