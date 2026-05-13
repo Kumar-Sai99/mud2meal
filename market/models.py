@@ -133,3 +133,37 @@ class Wishlist(models.Model):
         unique_together = ('buyer', 'crop')
         ordering = ['-added']
     def __str__(self): return f"{self.buyer.user.username} ♥ {self.crop.name}"
+
+
+class Order(models.Model):
+    DELIVERY_CHOICES = [
+        ('pickup', 'Self Pickup'),
+        ('delivery', 'Home Delivery'),
+    ]
+    PAYMENT_CHOICES = [
+        ('cod', 'Cash on Delivery'),
+        ('upi', 'UPI'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('dispatched', 'Dispatched'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    crop        = models.ForeignKey(Crop, on_delete=models.CASCADE, related_name='orders')
+    buyer       = models.ForeignKey(BuyerProfile, on_delete=models.CASCADE, related_name='orders')
+    farmer      = models.ForeignKey(FarmerProfile, on_delete=models.CASCADE, related_name='orders')
+    quantity    = models.PositiveIntegerField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    delivery    = models.CharField(max_length=20, choices=DELIVERY_CHOICES)
+    payment     = models.CharField(max_length=20, choices=PAYMENT_CHOICES)
+    address     = models.TextField(blank=True)  # for home delivery
+    status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    note        = models.TextField(blank=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+    updated_at  = models.DateTimeField(auto_now=True)
+
+    class Meta: ordering = ['-created_at']
+    def __str__(self): return f"Order #{self.pk} — {self.crop.name} by {self.buyer.user.username}"

@@ -23,6 +23,10 @@ urlpatterns = [
     path('chat/<int:room_id>/',                   views.chat_room,           name='chat_room'),
     path('start-chat/<int:crop_pk>/',             views.start_chat,          name='start_chat'),
     path('farmer-start-chat/<int:enquiry_pk>/',   views.farmer_start_chat,   name='farmer_start_chat'),
+    path('crop/<int:crop_pk>/order/',        views.place_order,    name='place_order'),
+    path('order/<int:pk>/',                  views.order_detail,   name='order_detail'),
+    path('order/<int:pk>/update-status/',    views.update_order_status, name='update_order_status'),
+    path('orders/',                          views.my_orders,      name='my_orders'),
 
     # ── REST API ───────────────────────────────────────
     path('api/crops/',                            api_views.api_crop_list,         name='api_crop_list'),

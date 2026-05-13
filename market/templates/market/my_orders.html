@@ -1,0 +1,78 @@
+{% extends 'market/base.html' %}
+{% block title %}My Orders — Mud2Meal{% endblock %}
+{% block content %}
+<a href="/dashboard/" class="back">← Back</a>
+
+<div style="margin-bottom:32px;">
+    <h1 style="font-family:var(--serif); font-size:36px; color:#fff;">
+        {% if is_farmer %}📦 Incoming Orders{% else %}🛒 My Orders{% endif %}
+    </h1>
+    <p style="color:var(--text3); margin-top:8px;">{{ orders.count }} order{{ orders.count|pluralize }} total</p>
+</div>
+
+{% if orders %}
+<div style="display:flex; flex-direction:column; gap:16px;">
+    {% for order in orders %}
+    <a href="/order/{{ order.pk }}/" style="text-decoration:none;">
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; display:flex; align-items:center; gap:20px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--bwarm)'" onmouseout="this.style.borderColor='var(--border)'">
+
+        <!-- EMOJI -->
+        <div style="width:56px; height:56px; background:var(--surface); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:28px; border:1px solid var(--border); flex-shrink:0;">
+            <span data-crop="{{ order.crop.name }}">{{ order.crop.category.icon|default:"🌿" }}</span>
+        </div>
+
+        <!-- INFO -->
+        <div style="flex:1; min-width:0;">
+            <div style="font-family:var(--serif); font-size:18px; color:#fff; margin-bottom:4px;">{{ order.crop.name }}</div>
+            <div style="font-size:13px; color:var(--text3);">
+                {{ order.quantity }} {{ order.crop.unit }} ·
+                {% if order.delivery == 'pickup' %}🚶 Pickup{% else %}🚚 Delivery{% endif %} ·
+                {% if order.payment == 'cod' %}💵 COD{% else %}📱 UPI{% endif %}
+            </div>
+            {% if is_farmer %}
+            <div style="font-size:12px; color:var(--text3); margin-top:4px;">👤 {{ order.buyer.user.get_full_name }}</div>
+            {% else %}
+            <div style="font-size:12px; color:var(--text3); margin-top:4px;">🌾 {{ order.farmer.user.get_full_name }}</div>
+            {% endif %}
+        </div>
+
+        <!-- PRICE + STATUS -->
+        <div style="text-align:right; flex-shrink:0;">
+            <div style="font-family:var(--serif); font-size:22px; color:var(--gold); margin-bottom:8px;">₹{{ order.total_price }}</div>
+            <span class="badge
+                {% if order.status == 'pending' %}bg-muted
+                {% elif order.status == 'confirmed' %}bg-blue
+                {% elif order.status == 'dispatched' %}bg-gold
+                {% elif order.status == 'delivered' %}bg-green
+                {% elif order.status == 'cancelled' %}bg-red
+                {% endif %}">
+                {% if order.status == 'pending' %}⏳
+                {% elif order.status == 'confirmed' %}✅
+                {% elif order.status == 'dispatched' %}🚚
+                {% elif order.status == 'delivered' %}🎉
+                {% elif order.status == 'cancelled' %}❌
+                {% endif %}
+                {{ order.get_status_display }}
+            </span>
+            <div style="font-size:11px; color:var(--text3); margin-top:8px;">{{ order.created_at|date:"M d, Y" }}</div>
+        </div>
+
+    </div>
+    </a>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="empty">
+    <span class="empty-icon">📦</span>
+    <h3>No orders yet</h3>
+    {% if is_farmer %}
+    <p>Orders from buyers will appear here.</p>
+    {% else %}
+    <p>Browse crops and place your first order!</p>
+    <a href="/crops/" class="btn btn-gold">Browse Crops</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

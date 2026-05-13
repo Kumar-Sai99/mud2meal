@@ -162,6 +162,11 @@
                     <div class="detail-cell-val">❤️ {{ crop.wishlist_count }} buyer{{ crop.wishlist_count|pluralize }}</div>
                 </div>
                 {% endif %}
+                {% if is_buyer and crop.status == 'available' %}
+                <a href="/crop/{{ crop.pk }}/order/" class="btn btn-green" style="justify-content:center">
+                    🛒 Place Order
+                </a>
+                {% endif %}
             </div>
         </div>
 

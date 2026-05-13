@@ -10,7 +10,7 @@ from django.db.models import Avg
 from .models import (
     Crop, Category, FarmerProfile, BuyerProfile,
     Enquiry, EnquiryReply, ChatRoom, ChatMessage,
-    Rating, Wishlist,
+    Rating, Wishlist, Order,
 )
 from .forms import RegisterForm, LoginForm, CropForm, EnquiryForm
 
@@ -435,3 +435,100 @@ def farmer_start_chat(request, enquiry_pk):
     enquiry = get_object_or_404(Enquiry, pk=enquiry_pk, crop__farmer=farmer)
     room, _ = ChatRoom.objects.get_or_create(farmer=farmer, buyer=enquiry.buyer, crop=enquiry.crop)
     return redirect(f'/chat/{room.pk}/')
+
+@login_required
+def place_order(request, crop_pk):
+    crop = get_object_or_404(Crop, pk=crop_pk, status='available')
+    try:
+        buyer = request.user.buyer
+    except:
+        messages.error(request, "Only buyers can place orders.")
+        return redirect(f'/crop/{crop_pk}/')
+
+    if request.method == 'POST':
+        quantity = int(request.POST.get('quantity', 1))
+        delivery = request.POST.get('delivery')
+        payment  = request.POST.get('payment')
+        address  = request.POST.get('address', '').strip()
+        note     = request.POST.get('note', '').strip()
+
+        if delivery not in ['pickup', 'delivery']:
+            messages.error(request, "Choose a delivery option.")
+            return redirect(f'/crop/{crop_pk}/')
+
+        if payment not in ['cod', 'upi']:
+            messages.error(request, "Choose a payment method.")
+            return redirect(f'/crop/{crop_pk}/')
+
+        if delivery == 'delivery' and not address:
+            messages.error(request, "Please provide your delivery address.")
+            return redirect(f'/order/place/{crop_pk}/')
+
+        try:
+            price = float(crop.price)
+        except:
+            price = 0
+
+        order = Order.objects.create(
+            crop=crop,
+            buyer=buyer,
+            farmer=crop.farmer,
+            quantity=quantity,
+            total_price=price * quantity,
+            delivery=delivery,
+            payment=payment,
+            address=address,
+            note=note,
+        )
+        messages.success(request, f"Order placed successfully! 🎉")
+        return redirect(f'/order/{order.pk}/')
+
+    return render(request, 'market/place_order.html', {'crop': crop})
+
+
+@login_required
+def order_detail(request, pk):
+    try:
+        buyer = request.user.buyer
+        order = get_object_or_404(Order, pk=pk, buyer=buyer)
+    except:
+        try:
+            farmer = request.user.farmer
+            order  = get_object_or_404(Order, pk=pk, farmer=farmer)
+        except:
+            return redirect('/home/')
+    return render(request, 'market/order_detail.html', {'order': order})
+
+
+@login_required
+def update_order_status(request, pk):
+    try:
+        farmer = request.user.farmer
+        order  = get_object_or_404(Order, pk=pk, farmer=farmer)
+    except:
+        messages.error(request, "Only the farmer can update order status.")
+        return redirect('/home/')
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        if status in ['confirmed','dispatched','delivered','cancelled']:
+            order.status = status
+            order.save()
+            messages.success(request, f"Order marked as {order.get_status_display()}.")
+    return redirect(f'/order/{pk}/')
+
+
+@login_required
+def my_orders(request):
+    try:
+        buyer  = request.user.buyer
+        orders = Order.objects.filter(buyer=buyer).select_related('crop','farmer__user')
+        return render(request, 'market/my_orders.html', {'orders': orders})
+    except:
+        pass
+    try:
+        farmer = request.user.farmer
+        orders = Order.objects.filter(farmer=farmer).select_related('crop','buyer__user')
+        return render(request, 'market/my_orders.html', {'orders': orders, 'is_farmer': True})
+    except:
+        pass
+    return redirect('/home/')
