@@ -248,10 +248,12 @@
             <div class="related-grid">
                 {% for r in related %}
                 <a href="/crop/{{ r.pk }}/" class="cc">
-                    <div class="cc-img">{% if r.photo %}<img src="{{ r.photo.url }}" alt="{{ r.name }}">{% else %}🌿{% endif %}</div>
+                    <div class="cc-img">{% if r.photo %}<img src="{{ r.photo.url }}" alt="{{ r.name }}">{% else %}<span data-crop="{{ r.name }}">{{ r.category.icon|default:"🌿" }}</span>{% endif %}</div>                    
                     <div class="cc-body">
-                        <div class="cc-name">{{ r.name }}</div>
-                        <div class="cc-foot"><span class="cc-price">₹{{ r.price }}</span><span class="cc-unit">/{{ r.unit }}</span></div>
+                        <div class="cc-foot" style="margin-bottom:6px;">
+                            <div class="cc-name" style="margin:0;">{{ r.name }}</div>
+                            <div><span class="cc-price">₹{{ r.price }}</span><span class="cc-unit">/{{ r.unit }}</span></div>
+                        </div>
                     </div>
                 </a>
                 {% endfor %}
