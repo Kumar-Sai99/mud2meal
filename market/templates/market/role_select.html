@@ -1,179 +1,65 @@
-{% extends "market/base.html" %}
-{% block title %}Join Mud2Meal{% endblock %}
-
+{% extends 'market/base.html' %}
+{% block title %}Join Mud2Meal — Choose your role{% endblock %}
 {% block extra_head %}
 <style>
-    .role-page {
-        min-height: 90vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 20px;
-    }
-    .role-logo {
-        font-size: 36px;
-        font-weight: 900;
-        margin-bottom: 12px;
-        background: linear-gradient(135deg, #f7971e, #ffd200);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .role-logo span {
-        background: linear-gradient(135deg, #56ab2f, #a8e063);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .role-title {
-        font-size: 28px;
-        font-weight: 900;
-        color: #fff;
-        text-align: center;
-        margin-bottom: 10px;
-    }
-    .role-subtitle {
-        color: #888;
-        font-size: 15px;
-        text-align: center;
-        margin-bottom: 50px;
-    }
-    .role-cards {
-        display: flex;
-        gap: 30px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .role-card {
-        width: 280px;
-        background: #1a2e1a;
-        border: 2px solid #2d5a1b;
-        border-radius: 20px;
-        padding: 40px 30px;
-        text-align: center;
-        text-decoration: none;
-        color: inherit;
-        transition: all 0.3s;
-    }
-    .role-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(92,184,92,0.25);
-        border-color: #5cb85c;
-    }
-    .role-card.buyer-card:hover {
-        box-shadow: 0 20px 50px rgba(247,151,30,0.25);
-        border-color: #f7971e;
-    }
-    .role-icon {
-        font-size: 64px;
-        margin-bottom: 20px;
-        display: block;
-    }
-    .role-name {
-        font-size: 22px;
-        font-weight: 900;
-        color: #fff;
-        margin-bottom: 12px;
-    }
-    .role-desc {
-        color: #888;
-        font-size: 14px;
-        line-height: 1.7;
-        margin-bottom: 24px;
-    }
-    .role-features {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 28px;
-        text-align: left;
-    }
-    .role-features li {
-        color: #aaa;
-        font-size: 13px;
-        padding: 6px 0;
-        border-bottom: 1px solid #2d5a1b;
-    }
-    .role-features li::before {
-        content: '✓ ';
-        color: #5cb85c;
-        font-weight: bold;
-    }
-    .role-btn {
-        display: block;
-        width: 100%;
-        padding: 13px;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: bold;
-        text-decoration: none;
-        transition: opacity 0.2s;
-    }
-    .farmer-btn {
-        background: linear-gradient(135deg, #56ab2f, #a8e063);
-        color: #000;
-    }
-    .buyer-btn {
-        background: linear-gradient(135deg, #f7971e, #ffd200);
-        color: #000;
-    }
-    .role-btn:hover { opacity: 0.9; }
-    .login-link {
-        margin-top: 40px;
-        color: #666;
-        font-size: 14px;
-        text-align: center;
-    }
-    .login-link a {
-        color: #5cb85c;
-        text-decoration: none;
-        font-weight: 600;
-    }
+.join-wrap{max-width:680px;margin:60px auto;text-align:center}
+.join-title{font-family:var(--serif);font-size:42px;color:var(--text);margin-bottom:12px}
+.join-title em{color:var(--gold);font-style:italic}
+.join-sub{font-size:16px;color:var(--text2);margin-bottom:52px;line-height:1.7}
+.role-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:36px}
+.role-card{background:var(--card);border:2px solid var(--border);border-radius:var(--rl);padding:36px 28px;text-decoration:none;transition:all var(--t) var(--ease);text-align:center;position:relative;overflow:hidden}
+.role-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity var(--t) var(--ease)}
+.role-card.farmer::before{background:radial-gradient(circle at 50% 0,rgba(46,125,79,.15),transparent 70%)}
+.role-card.buyer::before{background:radial-gradient(circle at 50% 0,rgba(220,140,30,.12),transparent 70%)}
+.role-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.role-card.farmer:hover{border-color:rgba(46,125,79,.4)}
+.role-card.buyer:hover{border-color:var(--bwarm)}
+.role-card:hover::before{opacity:1}
+.role-emoji{font-size:52px;margin-bottom:16px;display:block}
+.role-name{font-family:var(--serif);font-size:26px;color:var(--text);margin-bottom:10px}
+.role-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.role-perks{text-align:left;font-size:13px;color:var(--text3);list-style:none;display:flex;flex-direction:column;gap:7px}
+.role-perks li::before{content:'✓ ';color:var(--green-l);font-weight:700}
+.role-btn-f{display:block;margin-top:24px;padding:11px;border-radius:50px;font-weight:700;font-size:14px;background:var(--green);color:#fff;transition:all var(--t) var(--ease)}
+.role-btn-b{display:block;margin-top:24px;padding:11px;border-radius:50px;font-weight:700;font-size:14px;background:var(--gold);color:#000;transition:all var(--t) var(--ease)}
+.role-card:hover .role-btn-f{background:var(--green-l)}
+.role-card:hover .role-btn-b{background:var(--gold-l)}
+@media(max-width:600px){.role-cards{grid-template-columns:1fr}}
 </style>
 {% endblock %}
-
 {% block content %}
-<div class="role-page">
-    <div class="role-logo">M<span>2</span>Meal</div>
-    <div class="role-title">How do you want to join? 🌾</div>
-    <div class="role-subtitle">Choose your role to get started</div>
+<div class="join-wrap">
+  <div class="join-title">Join <em>Mud2Meal</em> for Free</div>
+  <p class="join-sub">Choose how you want to use the platform. You can only pick one role per account.</p>
 
-    <div class="role-cards">
-        <!-- FARMER CARD -->
-        <a href="/register/?role=farmer" class="role-card">
-            <span class="role-icon">👨‍🌾</span>
-            <div class="role-name">I'm a Farmer</div>
-            <div class="role-desc">
-                Sell your fresh crops directly to buyers. No middlemen, better prices.
-            </div>
-            <ul class="role-features">
-                <li>List your crops for free</li>
-                <li>Connect directly with buyers</li>
-                <li>Manage your farm dashboard</li>
-                <li>Reply to buyer enquiries</li>
-            </ul>
-            <span class="role-btn farmer-btn">Join as Farmer →</span>
-        </a>
+  <div class="role-cards">
+    <a href="/register/?role=farmer" class="role-card farmer">
+      <span class="role-emoji">🌾</span>
+      <div class="role-name">I'm a Farmer</div>
+      <p class="role-desc">List your crops, connect with buyers, get fair prices without middlemen.</p>
+      <ul class="role-perks">
+        <li>List unlimited crops</li>
+        <li>Receive buyer enquiries</li>
+        <li>Real-time buyer chat</li>
+        <li>Track sales & analytics</li>
+      </ul>
+      <div class="role-btn-f">Register as Farmer →</div>
+    </a>
 
-        <!-- BUYER CARD -->
-        <a href="/register/?role=buyer" class="role-card buyer-card">
-            <span class="role-icon">🛒</span>
-            <div class="role-name">I'm a Buyer</div>
-            <div class="role-desc">
-                Buy fresh crops directly from local farmers at fair prices.
-            </div>
-            <ul class="role-features">
-                <li>Browse fresh crops nearby</li>
-                <li>Filter by district & category</li>
-                <li>Contact farmers directly</li>
-                <li>Track your enquiries</li>
-            </ul>
-            <span class="role-btn buyer-btn">Join as Buyer →</span>
-        </a>
-    </div>
+    <a href="/register/?role=buyer" class="role-card buyer">
+      <span class="role-emoji">🛒</span>
+      <div class="role-name">I'm a Buyer</div>
+      <p class="role-desc">Browse fresh produce from verified farmers and buy at direct prices.</p>
+      <ul class="role-perks">
+        <li>Browse all listed crops</li>
+        <li>Send enquiries directly</li>
+        <li>Chat with farmers</li>
+        <li>Wishlist & compare crops</li>
+      </ul>
+      <div class="role-btn-b">Register as Buyer →</div>
+    </a>
+  </div>
 
-    <div class="login-link">
-        Already have an account? <a href="/login/">Login here</a>
-    </div>
+  <p style="font-size:14px;color:var(--text3)">Already have an account? <a href="/login/" style="color:var(--gold);text-decoration:none">Log in →</a></p>
 </div>
 {% endblock %}

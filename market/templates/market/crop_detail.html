@@ -1,469 +1,349 @@
-{% extends "market/base.html" %}
+{% extends 'market/base.html' %}
 {% block title %}{{ crop.name }} — Mud2Meal{% endblock %}
-
 {% block extra_head %}
 <style>
-    .crop-hero {
-        background: linear-gradient(to right, #1a2e1a, #0f1f0f);
-        border: 1px solid #2d5a1b;
-        border-radius: 16px;
-        padding: 40px;
-        margin-bottom: 30px;
-        display: flex;
-        gap: 40px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-    .crop-image {
-        width: 280px;
-        height: 280px;
-        object-fit: cover;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        flex-shrink: 0;
-    }
-    .crop-image-placeholder {
-        width: 280px;
-        height: 280px;
-        background: #243824;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 80px;
-        flex-shrink: 0;
-    }
-    .crop-info { flex: 1; min-width: 260px; }
-    .crop-category-badge {
-        display: inline-block;
-        background: #0f1f0f;
-        border: 1px solid #2d5a1b;
-        color: #5cb85c;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 13px;
-        margin-bottom: 12px;
-    }
-    .crop-name {
-        font-size: 36px;
-        font-weight: 900;
-        color: #fff;
-        margin-bottom: 10px;
-    }
-    .crop-price-big {
-        font-size: 32px;
-        font-weight: bold;
-        color: #5cb85c;
-        margin-bottom: 20px;
-    }
-    .crop-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-bottom: 24px;
-    }
-    .crop-meta-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #aaa;
-        font-size: 14px;
-    }
-    .crop-meta-item span:first-child { font-size: 18px; }
-    .crop-status {
-        display: inline-block;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: bold;
-    }
-    .status-available {
-        background: rgba(92,184,92,0.2);
-        color: #5cb85c;
-        border: 1px solid #5cb85c;
-    }
-    .status-sold {
-        background: rgba(220,53,69,0.2);
-        color: #ff6b6b;
-        border: 1px solid #ff6b6b;
-    }
-    .crop-desc {
-        background: #0f1f0f;
-        border-left: 3px solid #5cb85c;
-        border-radius: 0 8px 8px 0;
-        padding: 16px;
-        color: #aaa;
-        font-size: 14px;
-        line-height: 1.8;
-        margin-bottom: 24px;
-    }
-    .farmer-card {
-        background: #1a2e1a;
-        border: 1px solid #2d5a1b;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 30px;
-    }
-    .farmer-card-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #fff;
-        margin-bottom: 16px;
-        border-left: 3px solid #5cb85c;
-        padding-left: 10px;
-    }
-    .farmer-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 16px;
-    }
-    .farmer-photo {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #5cb85c;
-    }
-    .farmer-photo-placeholder {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: #243824;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        border: 2px solid #5cb85c;
-    }
-    .farmer-name {
-        font-size: 18px;
-        font-weight: bold;
-        color: #fff;
-    }
-    .farmer-location {
-        color: #888;
-        font-size: 13px;
-        margin-top: 4px;
-    }
-    .farmer-verified {
-        display: inline-block;
-        background: rgba(92,184,92,0.2);
-        color: #5cb85c;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        margin-top: 4px;
-    }
-    .enquiry-card {
-        background: #1a2e1a;
-        border: 1px solid #2d5a1b;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 30px;
-    }
-    .enquiry-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #fff;
-        margin-bottom: 16px;
-        border-left: 3px solid #5cb85c;
-        padding-left: 10px;
-    }
-    .form-group { margin-bottom: 14px; }
-    .form-group label {
-        display: block;
-        color: #888;
-        font-size: 13px;
-        margin-bottom: 6px;
-    }
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px 14px;
-        background: #0f1f0f;
-        border: 1px solid #2d5a1b;
-        border-radius: 8px;
-        color: #fff;
-        font-size: 14px;
-        outline: none;
-        transition: border 0.2s;
-        resize: vertical;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus { border-color: #5cb85c; }
-    .btn-enquire {
-        width: 100%;
-        padding: 12px;
-        background: #5cb85c;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .btn-enquire:hover { background: #4cae4c; }
-    .btn-chat {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        background: linear-gradient(135deg, #56ab2f, #a8e063);
-        color: #000;
-        border-radius: 8px;
-        text-align: center;
-        font-weight: bold;
-        text-decoration: none;
-        margin-top: 12px;
-        font-size: 15px;
-        transition: opacity 0.2s;
-    }
-    .btn-chat:hover { opacity: 0.9; }
-    .login-prompt {
-        text-align: center;
-        padding: 20px;
-        color: #888;
-        font-size: 14px;
-    }
-    .login-prompt a { color: #5cb85c; text-decoration: none; }
-    .related-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-        margin-top: 16px;
-    }
-    .crop-card {
-        background: #1a2e1a;
-        border: 1px solid #2d5a1b;
-        border-radius: 12px;
-        overflow: hidden;
-        transition: transform 0.2s;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
-    .crop-card:hover { transform: translateY(-4px); }
-    .crop-card img { width: 100%; height: 120px; object-fit: cover; }
-    .crop-card-placeholder {
-        width: 100%;
-        height: 120px;
-        background: #243824;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 36px;
-    }
-    .crop-card-body { padding: 12px; }
-    .crop-card-body h3 { font-size: 14px; color: #fff; margin-bottom: 4px; }
-    .crop-price { color: #5cb85c; font-weight: bold; font-size: 14px; }
-    .success-msg {
-        background: rgba(92,184,92,0.15);
-        border: 1px solid rgba(92,184,92,0.3);
-        color: #5cb85c;
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-size: 13px;
-        margin-bottom: 16px;
-        text-align: center;
-    }
-    .detail-layout {
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 24px;
-        align-items: start;
-    }
-    @media (max-width: 900px) {
-        .detail-layout { grid-template-columns: 1fr; }
-    }
-    .btn-back {
-        color: #5cb85c;
-        text-decoration: none;
-        font-size: 14px;
-        border: 1px solid #2d5a1b;
-        padding: 8px 18px;
-        border-radius: 8px;
-        display: inline-block;
-        transition: background 0.2s;
-    }
-    .btn-back:hover { background: #1a2e1a; }
+.detail-wrap{display:grid;grid-template-columns:1fr 400px;gap:32px;align-items:start}
+.left-col{display:flex;flex-direction:column;gap:20px}
+.right-col{display:flex;flex-direction:column;gap:16px;position:sticky;top:84px}
+
+/* CROP HEADER CARD */
+.crop-header{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:32px}
+.crop-cat-tag{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px}
+.crop-title{font-family:var(--serif);font-size:38px;color:#fff;line-height:1.1;margin-bottom:16px;letter-spacing:-.5px}
+.crop-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.crop-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.crop-price{font-family:var(--serif);font-size:48px;color:var(--gold);line-height:1}
+.crop-unit{font-size:15px;color:var(--text3)}
+.crop-qty{font-size:13px;color:var(--text3);margin-bottom:24px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.detail-cell{padding:14px 18px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.detail-cell:nth-child(even){border-right:none}
+.detail-cell:nth-last-child(-n+2){border-bottom:none}
+.detail-cell-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:4px}
+.detail-cell-val{font-size:14px;color:#fff;font-weight:500}
+
+/* FARMER MINI CARD */
+.farmer-mini{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;align-items:center;gap:16px}
+.farmer-av{width:48px;height:48px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--bwarm);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--gold);flex-shrink:0}
+
+/* DESCRIPTION */
+.desc-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
+
+/* REVIEWS */
+.reviews-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
+.rating-row{display:flex;align-items:center;gap:20px;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.rating-big{font-family:var(--serif);font-size:56px;color:#fff;line-height:1}
+.review-item{padding:16px 0;border-bottom:1px solid var(--border)}
+.review-item:last-child{border-bottom:none}
+
+/* ACTION CARD */
+.action-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
+.star-picker{display:flex;gap:8px;margin-bottom:14px}
+.star-picker label{font-size:28px;color:var(--text3);cursor:pointer;transition:color var(--t) var(--ease)}
+.star-picker label:hover,.star-picker label.lit{color:var(--gold)}
+
+/* RELATED */
+.related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:16px}
+
+@media(max-width:960px){
+    .detail-wrap{grid-template-columns:1fr}
+    .right-col{position:static}
+}
 </style>
 {% endblock %}
 
 {% block content %}
+<a href="javascript:history.back()" class="back">← Back</a>
 
-{% if error %}
-<div style="background:rgba(220,53,69,0.15);
-            border:1px solid rgba(220,53,69,0.3);
-            color:#ff6b6b; padding:10px 16px;
-            border-radius:8px; font-size:13px;
-            margin-bottom:16px;">
-    ⚠️ {{ error }}
-</div>
-{% endif %}
+<div class="detail-wrap">
 
-<!-- CROP HERO -->
-<div class="crop-hero">
-    {% if crop.photo %}
-        <img src="{{ crop.photo.url }}" alt="{{ crop.name }}" class="crop-image">
-    {% else %}
-        <div class="crop-image-placeholder">
-            {{ crop.category.icon|default:"🌾" }}
-        </div>
-    {% endif %}
+    <!-- ── LEFT COLUMN ── -->
+    <div class="left-col">
 
-    <div class="crop-info">
-        {% if crop.category %}
-        <div class="crop-category-badge">
-            {{ crop.category.icon }} {{ crop.category.name }}
-        </div>
-        {% endif %}
-        <div class="crop-name">{{ crop.name }}</div>
-        <div class="crop-price-big">₹{{ crop.price }} / {{ crop.get_unit_display }}</div>
-        <div class="crop-meta">
-            {% if crop.quantity %}
-            <div class="crop-meta-item">
-                <span>📦</span>
-                <span>Available: {{ crop.quantity }}</span>
-            </div>
+        <!-- CROP HEADER -->
+        <div class="crop-header">
+            {% if crop.category %}
+            <div class="crop-cat-tag">{{ crop.category.icon }} {{ crop.category.name }}</div>
             {% endif %}
-            {% if crop.district %}
-            <div class="crop-meta-item">
-                <span>📍</span>
-                <span>{{ crop.district }}, {{ crop.state }}</span>
+            <div class="crop-title">{{ crop.name }}</div>
+            <div class="crop-badges">
+                <span class="badge {% if crop.status == 'available' %}bg-green{% elif crop.status == 'sold' %}bg-red{% else %}bg-muted{% endif %}">{{ crop.get_status_display }}</span>
+                {% if crop.is_featured %}<span class="badge bg-gold">⭐ Featured</span>{% endif %}
+                {% if crop.farmer.is_verified %}<span class="badge bg-blue">✓ Verified Farmer</span>{% endif %}
             </div>
-            {% endif %}
-            <div class="crop-meta-item">
-                <span>🕐</span>
-                <span>Listed on {{ crop.created_at|date:"d M Y" }}</span>
-            </div>
-            <div class="crop-meta-item">
-                <span class="crop-status status-{{ crop.status }}">
-                    {{ crop.get_status_display }}
-                </span>
-            </div>
-        </div>
-        {% if crop.description %}
-        <div class="crop-desc">{{ crop.description }}</div>
-        {% endif %}
-    </div>
-</div>
+            <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:20px;">
 
-<!-- DETAIL LAYOUT -->
-<div class="detail-layout">
+            <!-- Crop Image -->
+            <div>
+                {% if crop.photo %}
 
-    <!-- LEFT — FARMER INFO -->
-    <div>
-        <div class="farmer-card">
-            <div class="farmer-card-title">👨‍🌾 About the Farmer</div>
-            <div class="farmer-info">
-                {% if crop.farmer.photo %}
-                    <img src="{{ crop.farmer.photo.url }}"
-                         class="farmer-photo"
-                         alt="{{ crop.farmer.user.get_full_name }}">
-                {% else %}
-                    <div class="farmer-photo-placeholder">👤</div>
+                <img src="{{ crop.photo.url }}"
+                    alt="{{ crop.name }}"
+                    style="
+                        width:180px;
+                        height:180px;
+                        object-fit:cover;
+                        border-radius:18px;
+                        border:1px solid var(--border);
+                    ">
+
+            {% else %}
+
+                <div style="
+                    width:180px;
+                    height:180px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:80px;
+                    border-radius:18px;
+                    background:#1b1712;
+                    border:1px solid var(--border);
+                " data-crop="{{ crop.name }}">
+                    {{ crop.category.icon|default:"🌿" }}
+                </div>
                 {% endif %}
+
+            </div>
+
+            <!-- Price Section -->
+            <div style="flex:1;">
+
+                <div class="crop-price-row">
+                    <span class="crop-price">₹{{ crop.price }}</span>
+                    <span class="crop-unit">per {{ crop.unit }}</span>
+                </div>
+
+                {% if crop.quantity %}
+                <div class="crop-qty">
+                    📦 {{ crop.quantity }} {{ crop.unit }} available
+                </div>
+                {% endif %}
+
+                {% if avg_rating %}
+                <div style="
+                    margin-top:10px;
+                    color:var(--gold);
+                    font-size:16px;
+                    font-weight:600;
+                ">
+                    ★ {{ avg_rating }}
+                    <span style="color:var(--text3);font-size:13px;">
+                        ({{ crop.rating_count }} reviews)
+                    </span>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+            <!-- DETAILS GRID -->
+            <div class="detail-grid">
+                {% if crop.district %}
+                <div class="detail-cell">
+                    <div class="detail-cell-label">Location</div>
+                    <div class="detail-cell-val">📍 {{ crop.district }}, {{ crop.state }}</div>
+                </div>
+                {% endif %}
+                <div class="detail-cell">
+                    <div class="detail-cell-label">Listed on</div>
+                    <div class="detail-cell-val">{{ crop.created_at|date:"M d, Y" }}</div>
+                </div>
+                {% if avg_rating %}
+                <div class="detail-cell">
+                    <div class="detail-cell-label">Rating</div>
+                    <div class="detail-cell-val" style="color:var(--gold)">★ {{ avg_rating }} <span style="color:var(--text3);font-size:12px">({{ crop.rating_count }} reviews)</span></div>
+                </div>
+                {% endif %}
+                {% if crop.wishlist_count %}
+                <div class="detail-cell">
+                    <div class="detail-cell-label">Saved by</div>
+                    <div class="detail-cell-val">❤️ {{ crop.wishlist_count }} buyer{{ crop.wishlist_count|pluralize }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- FARMER -->
+        <div class="farmer-mini">
+            <div class="farmer-av">{{ crop.farmer.user.first_name|first|upper }}</div>
+            <div style="flex:1">
+                <div style="font-weight:700;color:#fff;font-size:15px">{{ crop.farmer.user.get_full_name }}</div>
+                <div style="font-size:13px;color:var(--text3);margin-top:3px">
+                    🌾 Farmer{% if crop.farmer.is_verified %} · <span style="color:var(--green-l)">✓ Verified</span>{% endif %}
+                    {% if crop.farmer.district %} · {{ crop.farmer.district }}{% endif %}
+                </div>
+                {% if crop.farmer.specialty %}
+                <div style="font-size:12px;color:var(--text3);margin-top:3px">{{ crop.farmer.specialty }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        {% if crop.description %}
+        <div class="desc-card">
+            <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:12px">About this crop</div>
+            <p style="color:var(--text2);line-height:1.8;font-size:14.5px">{{ crop.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- REVIEWS -->
+        <div class="reviews-card">
+            <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:20px">Reviews</div>
+
+            {% if avg_rating %}
+            <div class="rating-row">
+                <div class="rating-big">{{ avg_rating }}</div>
                 <div>
-                    <div class="farmer-name">
-                        {{ crop.farmer.user.get_full_name }}
+                    <div style="color:var(--gold);font-size:22px;letter-spacing:2px;margin-bottom:4px">
+                        {% for i in "12345" %}{% if forloop.counter <= avg_rating|floatformat:"0"|add:"0" %}★{% else %}☆{% endif %}{% endfor %}
                     </div>
-                    <div class="farmer-location">
-                        📍 {{ crop.farmer.district }}, {{ crop.farmer.state }}
-                    </div>
-                    {% if crop.farmer.is_verified %}
-                    <div class="farmer-verified">✅ Verified Farmer</div>
-                    {% endif %}
+                    <div style="font-size:13px;color:var(--text3)">{{ crop.rating_count }} review{{ crop.rating_count|pluralize }}</div>
                 </div>
             </div>
-            {% if crop.farmer.bio %}
-            <p style="color:#888; font-size:13px; line-height:1.6;">
-                {{ crop.farmer.bio }}
-            </p>
+            {% endif %}
+
+            {% for r in ratings %}
+            <div class="review-item">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <div style="font-weight:600;color:#fff;font-size:14px">{{ r.buyer.user.get_full_name|default:r.buyer.user.username }}</div>
+                    <div style="font-size:12px;color:var(--text3)">{{ r.created|date:"M d, Y" }}</div>
+                </div>
+                <div style="color:var(--gold);font-size:14px;letter-spacing:1px;margin-bottom:8px">
+                    {% for i in "12345" %}{% if forloop.counter <= r.stars %}★{% else %}☆{% endif %}{% endfor %}
+                </div>
+                {% if r.review %}<p style="font-size:13.5px;color:var(--text2);line-height:1.6">{{ r.review }}</p>{% endif %}
+            </div>
+            {% empty %}
+            <p style="color:var(--text3);font-size:14px">No reviews yet. Be the first!</p>
+            {% endfor %}
+
+            {% if is_buyer and has_enquiry %}
+            <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+                <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:14px">{% if user_rating %}Update your review{% else %}Leave a review{% endif %}</div>
+                <form method="post" action="/crop/{{ crop.pk }}/rate/">
+                    {% csrf_token %}
+                    <div class="star-picker" id="starPicker">
+                        {% for i in "12345" %}
+                        <label data-val="{{ forloop.counter }}" {% if user_rating.stars == forloop.counter %}class="lit"{% endif %}>
+                            <input type="radio" name="stars" value="{{ forloop.counter }}" style="display:none" {% if user_rating.stars == forloop.counter %}checked{% endif %}>★
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div class="fg"><textarea name="review" class="fc" rows="3" placeholder="Describe your experience (optional)…">{{ user_rating.review|default:'' }}</textarea></div>
+                    <div style="display:flex;gap:10px;margin-top:12px">
+                        <button type="submit" class="btn btn-gold btn-sm">{% if user_rating %}Update{% else %}Submit review{% endif %}</button>
+                        {% if user_rating %}<a href="/crop/{{ crop.pk }}/rate/delete/" class="btn btn-red btn-sm">Remove</a>{% endif %}
+                    </div>
+                </form>
+            </div>
             {% endif %}
         </div>
+
+        <!-- RELATED -->
+        {% if related %}
+        <div>
+            <div class="sh"><h2>More like this</h2></div>
+            <div class="related-grid">
+                {% for r in related %}
+                <a href="/crop/{{ r.pk }}/" class="cc">
+                    <div class="cc-img">{% if r.photo %}<img src="{{ r.photo.url }}" alt="{{ r.name }}">{% else %}🌿{% endif %}</div>
+                    <div class="cc-body">
+                        <div class="cc-name">{{ r.name }}</div>
+                        <div class="cc-foot"><span class="cc-price">₹{{ r.price }}</span><span class="cc-unit">/{{ r.unit }}</span></div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 
-    <!-- RIGHT — ENQUIRY + CHAT -->
-    <div>
-        <div class="enquiry-card">
-            <div class="enquiry-title">📩 Contact Farmer</div>
+    <!-- ── RIGHT COLUMN (STICKY) ── -->
+    <div class="right-col">
+
+        <!-- ACTIONS -->
+        <div class="action-card">
+            <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:16px">Quick Actions</div>
 
             {% if user.is_authenticated %}
-                {% if is_farmer %}
-                    <div class="login-prompt">
-                        <p>🌾 You are viewing this as a farmer.</p>
-                    </div>
-                {% else %}
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label>Your Phone Number</label>
-                            <input type="text" name="phone"
-                                   placeholder="9999999999" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Message to Farmer</label>
-                            <textarea name="message" rows="4"
-                                      placeholder="I am interested in buying {{ crop.name }}. Please contact me..."
-                                      required></textarea>
-                        </div>
-                        <button type="submit" class="btn-enquire">
-                            📩 Send Enquiry
-                        </button>
-                    </form>
-
-                    {% if has_enquiry %}
-                    <a href="/start-chat/{{ crop.pk }}/" class="btn-chat">
-                        💬 Chat with Farmer
+                {% if is_buyer %}
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <a href="/crop/{{ crop.pk }}/wishlist/" class="btn {% if is_wishlisted %}btn-gold{% else %}btn-ghost{% endif %}" style="justify-content:center">
+                        {% if is_wishlisted %}❤️ Wishlisted{% else %}🤍 Save to Wishlist{% endif %}
                     </a>
+                    {% if chat_room %}
+                    <a href="/chat/{{ chat_room.pk }}/" class="btn btn-green" style="justify-content:center">💬 Continue Chat</a>
+                    {% else %}
+                    <a href="/start-chat/{{ crop.pk }}/" class="btn btn-ghost" style="justify-content:center">💬 Chat with Farmer</a>
                     {% endif %}
-                {% endif %}
-
-            {% else %}
-                <div class="login-prompt">
-                    <p>Please <a href="/login/">login</a> to contact the farmer</p>
-                    <p style="margin-top:8px;">
-                        New user? <a href="/register/">Register here</a>
-                    </p>
                 </div>
+                {% endif %}
+                {% if is_farmer %}
+                <div class="badge bg-muted" style="text-align:center;padding:12px">Farmers cannot send enquiries</div>
+                {% endif %}
+            {% else %}
+            <a href="/login/" class="btn btn-gold" style="width:100%;justify-content:center">Login to Enquire</a>
             {% endif %}
         </div>
-    </div>
 
-</div>
-
-<!-- RELATED CROPS -->
-{% if related %}
-<div style="margin-top:40px; border-top:1px solid #2d5a1b; padding-top:30px;">
-    <div class="section-title">
-        🌿 More {{ crop.category.name }} Crops
-    </div>
-    <div class="related-grid">
-        {% for r in related %}
-        <a href="/crop/{{ r.id }}/" class="crop-card">
-            {% if r.photo %}
-                <img src="{{ r.photo.url }}" alt="{{ r.name }}">
-            {% else %}
-                <div class="crop-card-placeholder">
-                    {{ r.category.icon|default:"🌾" }}
-                </div>
-            {% endif %}
-            <div class="crop-card-body">
-                <h3>{{ r.name }}</h3>
-                <div class="crop-price">
-                    ₹{{ r.price }}/{{ r.get_unit_display }}
-                </div>
+        <!-- ENQUIRY FORM -->
+        {% if is_buyer and crop.status == 'available' %}
+        <div class="action-card">
+            <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:16px">
+                📩 {% if has_enquiry %}Send another enquiry{% else %}Send Enquiry{% endif %}
             </div>
-        </a>
-        {% endfor %}
+            {% if has_enquiry %}
+            <div class="badge bg-green" style="margin-bottom:14px;display:block">✓ You've enquired about this crop</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="fg">
+                    <label class="lbl">Your message</label>
+                    <textarea name="message" class="fc" rows="3" placeholder="e.g. I'm interested in buying 50kg of {{ crop.name }}..." required></textarea>
+                </div>
+                <div class="fg">
+                    <label class="lbl">Phone number</label>
+                    <input type="tel" name="phone" class="fc" placeholder="+91 99999 99999">
+                </div>
+                <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;margin-top:4px">Send Enquiry →</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- PRICE SUMMARY BOX -->
+        <div style="background:rgba(240,160,32,.06);border:1px solid var(--bwarm);border-radius:var(--rl);padding:20px">
+            <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px">Price Summary</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:13px;color:var(--text3)">Price per {{ crop.unit }}</span>
+                <span style="font-family:var(--serif);font-size:20px;color:var(--gold)">₹{{ crop.price }}</span>
+            </div>
+            {% if crop.quantity %}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:13px;color:var(--text3)">Available qty</span>
+                <span style="font-size:14px;color:#fff">{{ crop.quantity }} {{ crop.unit }}</span>
+            </div>
+            {% endif %}
+            <div style="height:1px;background:var(--bwarm);margin:12px 0"></div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.6">💡 Price is negotiable. Send an enquiry to discuss bulk pricing with the farmer.</div>
+        </div>
+
     </div>
 </div>
-{% endif %}
 
-<!-- BACK BUTTON — bottom left -->
-<div style="margin-top:24px;">
-    <a href="javascript:history.back()" class="btn-back">← Back</a>
-</div>
-
+<script>
+(function(){
+    const labels = document.querySelectorAll('#starPicker label');
+    let sel = Number("{{ user_rating.stars|default:0 }}");
+    function light(n){labels.forEach((l,i)=>l.classList.toggle('lit',i<n))}
+    labels.forEach((l,i)=>{
+        l.addEventListener('mouseover',()=>light(i+1));
+        l.addEventListener('mouseout',()=>light(sel));
+        l.addEventListener('click',()=>{sel=i+1;light(sel)});
+    });
+    light(sel);
+})();
+</script>
 {% endblock %}

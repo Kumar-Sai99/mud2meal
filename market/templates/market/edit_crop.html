@@ -1,346 +1,53 @@
-{% extends "market/base.html" %}
-{% block title %}Edit Crop — Mud2Meal{% endblock %}
-
-{% block extra_head %}
-<style>
-    .page-wrap {
-        max-width: 700px;
-        margin: 0 auto;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, #1a1a2e, #16213e);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 20px;
-        padding: 28px 36px;
-        margin-bottom: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .page-header h1 {
-        font-size: 24px;
-        font-weight: bold;
-        color: #fff;
-    }
-
-    .page-header p {
-        color: #888;
-        font-size: 14px;
-        margin-top: 4px;
-    }
-
-    .form-card {
-        background: linear-gradient(135deg, #1a1a2e, #16213e);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 20px;
-        padding: 32px;
-        margin-bottom: 20px;
-    }
-
-    .form-card-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #fff;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .form-group {
-        margin-bottom: 16px;
-    }
-
-    .form-group label {
-        display: block;
-        color: #888;
-        font-size: 13px;
-        margin-bottom: 7px;
-        font-weight: 500;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        padding: 12px 16px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 10px;
-        color: #fff;
-        font-size: 14px;
-        outline: none;
-        transition: border 0.2s;
-        resize: vertical;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        border-color: #f7971e;
-    }
-
-    .form-group select option {
-        background: #1a1a2e;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-    }
-
-    .form-row-3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 14px;
-    }
-
-    .checkbox-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 8px;
-    }
-
-    .checkbox-group input {
-        width: auto;
-        cursor: pointer;
-        width: 16px;
-        height: 16px;
-    }
-
-    .checkbox-group label {
-        margin-bottom: 0;
-        cursor: pointer;
-        color: #ccc;
-        font-size: 14px;
-    }
-
-    .current-photo {
-        margin-bottom: 10px;
-    }
-
-    .current-photo img {
-        width: 100px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .current-photo p {
-        color: #666;
-        font-size: 12px;
-        margin-top: 6px;
-    }
-
-    .btn-row {
-        display: flex;
-        gap: 12px;
-        margin-top: 8px;
-    }
-
-    .btn-save {
-        flex: 1;
-        padding: 14px;
-        background: linear-gradient(135deg, #f7971e, #ffd200);
-        color: #000;
-        border: none;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: opacity 0.2s;
-    }
-
-    .btn-save:hover { opacity: 0.9; }
-
-    .btn-cancel {
-        padding: 14px 24px;
-        background: transparent;
-        border: 1px solid rgba(255,255,255,0.1);
-        color: #888;
-        border-radius: 10px;
-        font-size: 15px;
-        cursor: pointer;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        transition: all 0.2s;
-    }
-
-    .btn-cancel:hover {
-        border-color: #fff;
-        color: #fff;
-    }
-</style>
-{% endblock %}
-
+{% extends 'market/base.html' %}
+{% block title %}Edit {{ crop.name }} — Mud2Meal{% endblock %}
 {% block content %}
-<div class="page-wrap">
+<div style="max-width:680px;margin:0 auto">
+  <a href="/farmer-dashboard/" class="back">← Back to Dashboard</a>
+  <div style="font-family:var(--serif);font-size:30px;color:var(--text);margin-bottom:6px">Edit Crop</div>
+  <div style="font-size:14px;color:var(--text3);margin-bottom:32px">Update details for <strong style="color:var(--gold)">{{ crop.name }}</strong></div>
 
-    <!-- HEADER -->
-    <div class="page-header">
-        <div>
-            <h1>✏️ Edit Crop</h1>
-            <p>Update your crop details</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:28px;margin-bottom:20px">
+      <div class="fc-grid">
+        <div class="fg"><label class="lbl">Crop Name *</label><input type="text" name="name" class="fc" value="{{ crop.name }}" required></div>
+        <div class="fg"><label class="lbl">Category</label>
+          <select name="category" class="fc">
+            <option value="">No category</option>
+            {% for cat in categories %}<option value="{{ cat.pk }}" {% if crop.category.pk == cat.pk %}selected{% endif %}>{{ cat.icon }} {{ cat.name }}</option>{% endfor %}
+          </select>
         </div>
-        <a href="/farmer-dashboard/" style="color:#f7971e;
-           text-decoration:none; font-size:14px;">
-            ← Back to Dashboard
-        </a>
+        <div class="fg"><label class="lbl">Price (₹) *</label><input type="text" name="price" class="fc" value="{{ crop.price }}" required></div>
+        <div class="fg"><label class="lbl">Unit</label>
+          <select name="unit" class="fc">
+            {% for val, label in crop.UNIT_CHOICES %}<option value="{{ val }}" {% if crop.unit == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="fg"><label class="lbl">Quantity Available</label><input type="text" name="quantity" class="fc" value="{{ crop.quantity }}" placeholder="e.g. 200"></div>
+        <div class="fg"><label class="lbl">Status</label>
+          <select name="status" class="fc">
+            {% for val, label in crop.STATUS_CHOICES %}<option value="{{ val }}" {% if crop.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="fg"><label class="lbl">District</label><input type="text" name="district" class="fc" value="{{ crop.district }}"></div>
+        <div class="fg"><label class="lbl">State</label><input type="text" name="state" class="fc" value="{{ crop.state }}"></div>
+      </div>
+      <div class="fg"><label class="lbl">Description</label><textarea name="description" class="fc" rows="4">{{ crop.description }}</textarea></div>
+      <div class="fg">
+        <label class="lbl">Photo</label>
+        {% if crop.photo %}<div style="margin-bottom:10px"><img src="{{ crop.photo.url }}" alt="" style="width:120px;height:80px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border)"></div>{% endif %}
+        <input type="file" name="photo" class="fc" accept="image/*">
+        {% if crop.photo %}<div style="font-size:12px;color:var(--text3);margin-top:6px">Leave empty to keep current photo</div>{% endif %}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" name="is_featured" value="1" id="feat" style="width:18px;height:18px;accent-color:var(--gold)" {% if crop.is_featured %}checked{% endif %}>
+        <label for="feat" style="font-size:14px;color:var(--text2);cursor:pointer">Mark as Featured</label>
+      </div>
     </div>
-
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <!-- BASIC INFO -->
-        <div class="form-card">
-            <div class="form-card-title">🌾 Crop Information</div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Crop Name *</label>
-                    <input type="text" name="name"
-                           value="{{ crop.name }}" required>
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select name="category">
-                        <option value="">Select Category</option>
-                        {% for cat in categories %}
-                        <option value="{{ cat.id }}"
-                            {% if crop.category.id == cat.id %}
-                            selected {% endif %}>
-                            {{ cat.icon }} {{ cat.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" rows="3">{{ crop.description }}</textarea>
-            </div>
-        </div>
-
-        <!-- PRICE & QUANTITY -->
-        <div class="form-card">
-            <div class="form-card-title">💰 Price & Quantity</div>
-
-            <div class="form-row-3">
-                <div class="form-group">
-                    <label>Price *</label>
-                    <input type="text" name="price"
-                           value="{{ crop.price }}" required>
-                </div>
-                <div class="form-group">
-                    <label>Unit</label>
-                    <select name="unit">
-                        <option value="kg"
-                            {% if crop.unit == 'kg' %}selected{% endif %}>
-                            Kilogram
-                        </option>
-                        <option value="quintal"
-                            {% if crop.unit == 'quintal' %}selected{% endif %}>
-                            Quintal
-                        </option>
-                        <option value="ton"
-                            {% if crop.unit == 'ton' %}selected{% endif %}>
-                            Ton
-                        </option>
-                        <option value="dozen"
-                            {% if crop.unit == 'dozen' %}selected{% endif %}>
-                            Dozen
-                        </option>
-                        <option value="piece"
-                            {% if crop.unit == 'piece' %}selected{% endif %}>
-                            Piece
-                        </option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Quantity Available</label>
-                    <input type="text" name="quantity"
-                           value="{{ crop.quantity }}">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Status</label>
-                <select name="status">
-                    <option value="available"
-                        {% if crop.status == 'available' %}selected{% endif %}>
-                        ✅ Available
-                    </option>
-                    <option value="sold"
-                        {% if crop.status == 'sold' %}selected{% endif %}>
-                        💰 Sold
-                    </option>
-                    <option value="unavailable"
-                        {% if crop.status == 'unavailable' %}selected{% endif %}>
-                        ❌ Unavailable
-                    </option>
-                </select>
-            </div>
-
-            <div class="checkbox-group">
-                <input type="checkbox" name="is_featured"
-                       id="is_featured" value="1"
-                       {% if crop.is_featured %}checked{% endif %}>
-                <label for="is_featured">
-                    ⭐ Feature this crop on home page
-                </label>
-            </div>
-        </div>
-
-        <!-- LOCATION -->
-        <div class="form-card">
-            <div class="form-card-title">📍 Location</div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>District</label>
-                    <input type="text" name="district"
-                           value="{{ crop.district }}">
-                </div>
-                <div class="form-group">
-                    <label>State</label>
-                    <input type="text" name="state"
-                           value="{{ crop.state }}">
-                </div>
-            </div>
-        </div>
-
-        <!-- PHOTO -->
-        <div class="form-card">
-            <div class="form-card-title">📷 Crop Photo</div>
-
-            {% if crop.photo %}
-            <div class="current-photo">
-                <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
-                <p>Current photo — upload new to replace</p>
-            </div>
-            {% endif %}
-
-            <div class="form-group">
-                <label>Upload New Photo</label>
-                <input type="file" name="photo" accept="image/*">
-            </div>
-        </div>
-
-        <!-- BUTTONS -->
-        <div class="btn-row">
-            <a href="/farmer-dashboard/" class="btn-cancel">
-                Cancel
-            </a>
-            <button type="submit" class="btn-save">
-                💾 Save Changes
-            </button>
-        </div>
-    </form>
+    <div style="display:flex;gap:12px">
+      <button type="submit" class="btn btn-gold btn-lg">Save Changes</button>
+      <a href="/farmer-dashboard/" class="btn btn-ghost btn-lg">Cancel</a>
+    </div>
+  </form>
 </div>
 {% endblock %}

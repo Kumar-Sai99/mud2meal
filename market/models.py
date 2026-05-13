@@ -1,21 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Avg
 
 
-# ── CATEGORY ────────────────────────────────────────
 class Category(models.Model):
     name = models.CharField(max_length=100)
     icon = models.CharField(max_length=10, blank=True)
-
-    def __str__(self):
-        return self.name
-
+    def __str__(self): return self.name
     class Meta:
-        ordering            = ['name']
+        ordering = ['name']
         verbose_name_plural = 'Categories'
 
 
-# ── FARMER PROFILE ───────────────────────────────────
 class FarmerProfile(models.Model):
     user        = models.OneToOneField(User, on_delete=models.CASCADE, related_name='farmer')
     phone       = models.CharField(max_length=15, blank=True)
@@ -27,37 +23,22 @@ class FarmerProfile(models.Model):
     farm_id     = models.CharField(max_length=100, blank=True)
     specialty   = models.CharField(max_length=200, blank=True)
     is_verified = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.user.username} — Farmer"
+    def __str__(self): return f"{self.user.username} — Farmer"
 
 
-# ── BUYER PROFILE ────────────────────────────────────
 class BuyerProfile(models.Model):
     user             = models.OneToOneField(User, on_delete=models.CASCADE, related_name='buyer')
     phone            = models.CharField(max_length=15, blank=True)
     district         = models.CharField(max_length=100, blank=True)
     state            = models.CharField(max_length=100, blank=True)
     delivery_address = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{self.user.username} — Buyer"
+    def __str__(self): return f"{self.user.username} — Buyer"
 
 
-# ── CROP ─────────────────────────────────────────────
 class Crop(models.Model):
-    UNIT_CHOICES = [
-        ('kg',      'Kilogram'),
-        ('quintal', 'Quintal'),
-        ('ton',     'Ton'),
-        ('dozen',   'Dozen'),
-        ('piece',   'Piece'),
-    ]
-    STATUS_CHOICES = [
-        ('available',   'Available'),
-        ('sold',        'Sold'),
-        ('unavailable', 'Unavailable'),
-    ]
+    UNIT_CHOICES   = [('kg','Kilogram'),('quintal','Quintal'),('ton','Ton'),('dozen','Dozen'),('piece','Piece')]
+    STATUS_CHOICES = [('available','Available'),('sold','Sold'),('unavailable','Unavailable')]
+
     farmer      = models.ForeignKey(FarmerProfile, on_delete=models.CASCADE, related_name='crops')
     category    = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='crops')
     name        = models.CharField(max_length=200)
@@ -69,18 +50,27 @@ class Crop(models.Model):
     district    = models.CharField(max_length=100, blank=True)
     state       = models.CharField(max_length=100, blank=True)
     photo       = models.ImageField(upload_to='crops/', blank=True, null=True)
+    emoji       = models.CharField(max_length=10, blank=True)
     status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
     is_featured = models.BooleanField(default=False)
     created_at  = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.name} by {self.farmer.user.username}"
+    class Meta: ordering = ['-created_at']
+    def __str__(self): return f"{self.name} by {self.farmer.user.username}"
 
-    class Meta:
-        ordering = ['-created_at']
+    @property
+    def avg_rating(self):
+        r = self.ratings.aggregate(avg=Avg('stars'))['avg']
+        return round(r, 1) if r else None
+
+    @property
+    def rating_count(self): return self.ratings.count()
+
+    @property
+    def wishlist_count(self): return self.wishlisted_by.count()
 
 
-# ── ENQUIRY ──────────────────────────────────────────
+
 class Enquiry(models.Model):
     crop    = models.ForeignKey(Crop, on_delete=models.CASCADE, related_name='enquiries')
     buyer   = models.ForeignKey(BuyerProfile, on_delete=models.CASCADE, related_name='enquiries')
@@ -88,54 +78,58 @@ class Enquiry(models.Model):
     phone   = models.CharField(max_length=15, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.buyer.user.username} enquired about {self.crop.name}"
-
+    def __str__(self): return f"{self.buyer.user.username} → {self.crop.name}"
     class Meta:
-        ordering            = ['-created']
+        ordering = ['-created']
         verbose_name_plural = 'Enquiries'
 
 
-# ── ENQUIRY REPLY ─────────────────────────────────────
 class EnquiryReply(models.Model):
-    enquiry = models.OneToOneField(
-        Enquiry, on_delete=models.CASCADE, related_name='reply'
-    )
+    enquiry = models.OneToOneField(Enquiry, on_delete=models.CASCADE, related_name='reply')
     message = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
+    def __str__(self): return f"Reply to {self.enquiry}"
 
-    def __str__(self):
-        return f"Reply to {self.enquiry}"
-    
-# ── CHAT ROOM ─────────────────────────────────────────
+
 class ChatRoom(models.Model):
     farmer  = models.ForeignKey(FarmerProfile, on_delete=models.CASCADE, related_name='chat_rooms')
     buyer   = models.ForeignKey(BuyerProfile,  on_delete=models.CASCADE, related_name='chat_rooms')
     crop    = models.ForeignKey(Crop, on_delete=models.CASCADE, related_name='chat_rooms')
     created = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         unique_together = ['farmer', 'buyer', 'crop']
         ordering        = ['-created']
-
-    def __str__(self):
-        return f"{self.buyer.user.username} ↔ {self.farmer.user.username} — {self.crop.name}"
-
-    def get_room_name(self):
-        return f"chat_{self.pk}"
+    def __str__(self): return f"{self.buyer.user.username} ↔ {self.farmer.user.username} — {self.crop.name}"
+    def get_room_name(self): return f"chat_{self.pk}"
 
 
-# ── CHAT MESSAGE ──────────────────────────────────────
 class ChatMessage(models.Model):
     room      = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
     sender    = models.ForeignKey(User, on_delete=models.CASCADE)
     message   = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read   = models.BooleanField(default=False)
+    class Meta: ordering = ['timestamp']
+    def __str__(self): return f"{self.sender.username}: {self.message[:30]}"
 
+
+class Rating(models.Model):
+    crop    = models.ForeignKey(Crop, on_delete=models.CASCADE, related_name='ratings')
+    buyer   = models.ForeignKey(BuyerProfile, on_delete=models.CASCADE, related_name='ratings')
+    stars   = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    review  = models.TextField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
     class Meta:
-        ordering = ['timestamp']
+        unique_together = ('crop', 'buyer')
+        ordering = ['-created']
+    def __str__(self): return f"{self.buyer.user.username} rated {self.crop.name} {self.stars}★"
 
-    def __str__(self):
-        return f"{self.sender.username}: {self.message[:30]}"
+
+class Wishlist(models.Model):
+    buyer = models.ForeignKey(BuyerProfile, on_delete=models.CASCADE, related_name='wishlist')
+    crop  = models.ForeignKey(Crop, on_delete=models.CASCADE, related_name='wishlisted_by')
+    added = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('buyer', 'crop')
+        ordering = ['-added']
+    def __str__(self): return f"{self.buyer.user.username} ♥ {self.crop.name}"
