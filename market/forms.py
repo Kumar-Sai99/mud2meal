@@ -1,9 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Crop, Enquiry, FarmerProfile, BuyerProfile
+from .models import Crop, FarmerProfile, BuyerProfile
 
 
-# ── REGISTER FORM ─────────────────────────────────────
 class RegisterForm(forms.Form):
     username   = forms.CharField(max_length=150)
     email      = forms.EmailField()
@@ -37,13 +36,11 @@ class RegisterForm(forms.Form):
         return email
 
 
-# ── LOGIN FORM ────────────────────────────────────────
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)
 
 
-# ── CROP FORM ─────────────────────────────────────────
 class CropForm(forms.ModelForm):
     class Meta:
         model  = Crop
@@ -66,20 +63,6 @@ class CropForm(forms.ModelForm):
         return name
 
 
-# ── ENQUIRY FORM ──────────────────────────────────────
-class EnquiryForm(forms.ModelForm):
-    class Meta:
-        model  = Enquiry
-        fields = ['message', 'phone']
-
-    def clean_message(self):
-        message = self.cleaned_data.get('message')
-        if not message:
-            raise forms.ValidationError('Message cannot be empty!')
-        return message
-
-
-# ── FARMER PROFILE FORM ───────────────────────────────
 class FarmerProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=50)
     last_name  = forms.CharField(max_length=50)
@@ -87,10 +70,9 @@ class FarmerProfileForm(forms.ModelForm):
 
     class Meta:
         model  = FarmerProfile
-        fields = ['phone', 'district', 'state', 'farm_id', 'specialty', 'bio', 'photo']
+        fields = ['phone', 'district', 'state', 'farm_id', 'specialty', 'bio', 'photo', 'upi_id']
 
 
-# ── BUYER PROFILE FORM ────────────────────────────────
 class BuyerProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=50)
     last_name  = forms.CharField(max_length=50)

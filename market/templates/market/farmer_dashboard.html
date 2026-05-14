@@ -3,37 +3,15 @@
 {% block extra_head %}
 <style>
 .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
-.dash-welcome{font-family:var(--serif);font-size:30px;color:var(--text)}
-.dash-welcome span{color:var(--gold);font-style:italic}
-.crop-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.crop-row:last-child{border-bottom:none}
-.crop-thumb-sm{width:52px;height:52px;border-radius:10px;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.crop-thumb-sm{width:48px;height:48px;border-radius:8px;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border)}
 .crop-thumb-sm img{width:100%;height:100%;object-fit:cover}
-.cr-info{flex:1;min-width:0}
-.cr-name{font-weight:700;color:var(--text);font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cr-meta{font-size:12px;color:var(--text3);margin-top:3px}
-.enq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px;transition:border-color var(--t) var(--ease)}
-.enq-item.unread{border-color:rgba(220,140,30,.25)}
-.enq-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
-.enq-buyer{font-weight:700;color:var(--text);font-size:14px}
-.enq-crop{font-size:12.5px;color:var(--gold)}
-.enq-time{font-size:11.5px;color:var(--text3);white-space:nowrap}
-.enq-msg{font-size:13.5px;color:var(--text2);line-height:1.6;margin-bottom:12px}
-.enq-actions{display:flex;gap:8px;flex-wrap:wrap}
-.reply-box{background:var(--card);border:1px solid var(--bwarm);border-radius:var(--r);padding:14px;margin-top:12px;font-size:13px;color:var(--text2)}
-.reply-box strong{color:var(--gold)}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:20px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
 .modal-overlay.open{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:32px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:32px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;margin:auto}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
 .modal-title{font-family:var(--serif);font-size:24px;color:var(--text)}
-.modal-close{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;line-height:1;transition:color var(--t) var(--ease)}
+.modal-close{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;transition:color var(--t)}
 .modal-close:hover{color:var(--text)}
-.reply-form{display:none;margin-top:12px}
-.reply-form.open{display:block}
-.chat-item{display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;text-decoration:none;transition:all var(--t) var(--ease)}
-.chat-item:hover{border-color:var(--bwarm);transform:translateX(3px)}
-.chat-av{width:42px;height:42px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--bwarm);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--gold);flex-shrink:0}
 </style>
 {% endblock %}
 {% block content %}
@@ -41,8 +19,8 @@
 <!-- HEADER -->
 <div class="dash-header">
   <div>
-    <div class="dash-welcome">Welcome, <span>{{ farmer.user.first_name }}</span> 🌾</div>
-    <div style="font-size:14px;color:var(--text3);margin-top:4px">Manage your crops, reply to buyers, track your sales</div>
+    <div style="font-family:var(--serif);font-size:30px;color:var(--text)">Welcome, <span style="color:var(--gold);font-style:italic">{{ farmer.user.first_name }}</span> 🌾</div>
+    <div style="font-size:14px;color:var(--text3);margin-top:4px">Manage your crops and incoming orders</div>
   </div>
   <button onclick="document.getElementById('addCropModal').classList.add('open')" class="btn btn-gold">+ Add New Crop</button>
 </div>
@@ -52,17 +30,15 @@
   <div class="sc"><div class="sc-num">{{ total_crops }}</div><div class="sc-lbl">Total Crops</div></div>
   <div class="sc"><div class="sc-num" style="color:var(--green-l)">{{ available_crops }}</div><div class="sc-lbl">Available</div></div>
   <div class="sc"><div class="sc-num" style="color:var(--text3)">{{ sold_crops }}</div><div class="sc-lbl">Sold</div></div>
-  <div class="sc"><div class="sc-num" style="color:var(--gold)">{{ total_enquiries }}</div><div class="sc-lbl">Enquiries<div class="sc-sub">{{ unread }} unread</div></div></div>
+  <div class="sc"><div class="sc-num" style="color:var(--gold)">{{ pending_orders }}</div><div class="sc-lbl">Pending Orders</div></div>
   <div class="sc"><div class="sc-num" style="color:var(--gold-l)">{% if avg_farm_rating %}{{ avg_farm_rating }}★{% else %}—{% endif %}</div><div class="sc-lbl">Avg Rating</div></div>
-  <div class="sc"><div class="sc-num">{{ total_wishlist }}</div><div class="sc-lbl">Wishlist Saves</div></div>
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" data-group="dash" data-tab="crops"     onclick="switchTab('dash','crops')">🌾 My Crops ({{ total_crops }})</button>
-  <button class="tab"        data-group="dash" data-tab="enquiries" onclick="switchTab('dash','enquiries')">📩 Enquiries ({{ total_enquiries }}){% if unread %} <span class="badge bg-gold" style="margin-left:6px">{{ unread }}</span>{% endif %}</button>
-  <button class="tab"        data-group="dash" data-tab="chats"     onclick="switchTab('dash','chats')">💬 Chats ({{ chats.count }})</button>
-  <button class="tab"        data-group="dash" data-tab="reviews"   onclick="switchTab('dash','reviews')">⭐ Reviews</button>
+  <button class="tab active" data-group="dash" data-tab="crops"   onclick="switchTab('dash','crops')">🌾 My Crops ({{ total_crops }})</button>
+  <button class="tab"        data-group="dash" data-tab="orders"  onclick="switchTab('dash','orders')">📦 Orders ({{ order_count }}){% if pending_orders %}<span class="badge bg-gold" style="margin-left:6px">{{ pending_orders }} new</span>{% endif %}</button>
+  <button class="tab"        data-group="dash" data-tab="reviews" onclick="switchTab('dash','reviews')">⭐ Reviews</button>
 </div>
 
 <!-- TAB: CROPS -->
@@ -71,16 +47,20 @@
   <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden">
     <table class="tbl">
       <thead>
-        <tr>
-          <th>Crop</th><th>Category</th><th>Price</th><th>Qty</th><th>Status</th><th>Wishlist</th><th>Actions</th>
-        </tr>
+        <tr><th>Crop</th><th>Category</th><th>Price</th><th>Qty</th><th>Status</th><th>Actions</th></tr>
       </thead>
       <tbody>
         {% for crop in crops %}
         <tr>
           <td>
             <div style="display:flex;align-items:center;gap:12px">
-              <div class="crop-thumb-sm">{% if crop.photo %}<img src="{{ crop.photo.url }}" alt="">{% else %}🌿{% endif %}</div>
+              <div class="crop-thumb-sm">
+                {% if crop.photo %}
+                <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
+                {% else %}
+                <span data-crop="{{ crop.name }}">{{ crop.category.icon|default:"🌿" }}</span>
+                {% endif %}
+              </div>
               <div>
                 <div style="font-weight:700;color:var(--text);font-size:14px">{{ crop.name }}</div>
                 <div style="font-size:12px;color:var(--text3)">{{ crop.district }}, {{ crop.state }}</div>
@@ -95,12 +75,13 @@
               {{ crop.get_status_display }}
             </span>
           </td>
-          <td>{% if crop.wishlist_count %}<span style="color:var(--gold)">❤️ {{ crop.wishlist_count }}</span>{% else %}—{% endif %}</td>
           <td>
             <div style="display:flex;gap:8px">
               <a href="/crop/{{ crop.pk }}/edit/" class="btn btn-ghost btn-sm">Edit</a>
               <form method="post" onsubmit="return confirm('Delete {{ crop.name }}?')">
-                {% csrf_token %}<input type="hidden" name="action" value="delete_crop"><input type="hidden" name="crop_id" value="{{ crop.pk }}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_crop">
+                <input type="hidden" name="crop_id" value="{{ crop.pk }}">
                 <button type="submit" class="btn btn-red btn-sm">Delete</button>
               </form>
             </div>
@@ -114,74 +95,105 @@
   <div class="empty">
     <span class="empty-icon">🌾</span>
     <h3>No crops listed yet</h3>
-    <p>Add your first crop to start getting enquiries from buyers.</p>
+    <p>Add your first crop to start receiving orders.</p>
     <button onclick="document.getElementById('addCropModal').classList.add('open')" class="btn btn-gold">+ Add First Crop</button>
   </div>
   {% endif %}
 </div>
 
-<!-- TAB: ENQUIRIES -->
-<div class="tab-panel" data-group="dash" data-panel="dash" data-id="enquiries">
-  {% if enquiries %}
-  {% for enq in enquiries %}
-  <div class="enq-item {% if not enq.is_read %}unread{% endif %}">
-    <div class="enq-header">
-      <div>
-        <div class="enq-buyer">{{ enq.buyer.user.get_full_name }} {% if not enq.is_read %}<span class="badge bg-gold" style="font-size:10px">New</span>{% endif %}</div>
-        <div class="enq-crop">re: {{ enq.crop.name }}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="enq-time">{{ enq.created|date:"M d, Y · H:i" }}</div>
-        {% if enq.phone %}<div style="font-size:12px;color:var(--text3);margin-top:3px">📞 {{ enq.phone }}</div>{% endif %}
-      </div>
-    </div>
-    <div class="enq-msg">{{ enq.message }}</div>
+<!-- TAB: ORDERS -->
+<div class="tab-panel" data-group="dash" data-panel="dash" data-id="orders">
+  {% if orders %}
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    {% for order in orders %}
+    <div style="background:var(--surface);border:1px solid {% if order.status == 'pending' %}rgba(240,160,32,.3){% else %}var(--border){% endif %};border-radius:var(--rl);padding:22px;">
 
-    {% if enq.reply %}
-    <div class="reply-box"><strong>Your reply:</strong> {{ enq.reply.message }}</div>
-    {% endif %}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;background:var(--card);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--border);flex-shrink:0;">
+            <span data-crop="{{ order.crop.name }}">{{ order.crop.category.icon|default:"🌿" }}</span>
+          </div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:15px;">{{ order.crop.name }}</div>
+            <div style="font-size:12px;color:var(--text3);">Order #{{ order.pk }} · {{ order.created_at|date:"M d, Y" }}</div>
+          </div>
+        </div>
+        <span class="badge {% if order.status == 'pending' %}bg-gold{% elif order.status == 'confirmed' %}bg-blue{% elif order.status == 'dispatched' %}bg-muted{% elif order.status == 'delivered' %}bg-green{% else %}bg-red{% endif %}">
+          {% if order.status == 'pending' %}⏳{% elif order.status == 'confirmed' %}✅{% elif order.status == 'dispatched' %}🚚{% elif order.status == 'delivered' %}🎉{% else %}❌{% endif %}
+          {{ order.get_status_display }}
+        </span>
+      </div>
 
-    <div class="enq-actions">
-      {% if not enq.is_read %}
-      <form method="post"><{% csrf_token %}<input type="hidden" name="action" value="mark_read"><input type="hidden" name="enquiry_id" value="{{ enq.pk }}">
-        <button type="submit" class="btn btn-ghost btn-sm">✓ Mark read</button>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;">
+        <div style="background:var(--card);border-radius:10px;padding:10px;">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:3px;">Buyer</div>
+          <div style="font-size:13px;color:#fff;font-weight:600;">{{ order.buyer.user.get_full_name }}</div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:10px;">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:3px;">Amount</div>
+          <div style="font-family:var(--serif);font-size:17px;color:var(--gold);">₹{{ order.total_price }}</div>
+          <div style="font-size:11px;color:var(--text3);">{{ order.quantity }} {{ order.crop.unit }}</div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:10px;">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:3px;">Delivery</div>
+          <div style="font-size:13px;color:#fff;">{% if order.delivery == 'pickup' %}🚶 Pickup{% else %}🚚 Delivery{% endif %}</div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:10px;">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:3px;">Payment</div>
+          <div style="font-size:13px;color:#fff;">{% if order.payment == 'cod' %}💵 COD{% else %}📱 UPI{% endif %}</div>
+        </div>
+      </div>
+
+      {% if order.delivery == 'delivery' and order.address %}
+      <div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:4px;">Delivery Address</div>
+        <div style="font-size:13px;color:var(--text2);">{{ order.address }}</div>
+      </div>
+      {% endif %}
+
+      {% if order.note %}
+      <div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:4px;">Buyer's Note</div>
+        <div style="font-size:13px;color:var(--text2);">{{ order.note }}</div>
+      </div>
+      {% endif %}
+
+      {% if order.status != 'delivered' and order.status != 'cancelled' %}
+      <form method="post" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_order">
+        <input type="hidden" name="order_id" value="{{ order.pk }}">
+        <div style="flex:1;min-width:200px;">
+          <label style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Note to buyer (optional)</label>
+          <textarea name="farmer_note" class="fc" rows="2" placeholder="e.g. Will deliver by evening…" style="font-size:13px;">{{ order.farmer_note }}</textarea>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          {% if order.status == 'pending' %}
+          <button name="status" value="confirmed" class="btn btn-green btn-sm">✅ Confirm</button>
+          <button name="status" value="cancelled" class="btn btn-red btn-sm">❌ Reject</button>
+          {% elif order.status == 'confirmed' %}
+          <button name="status" value="dispatched" class="btn btn-gold btn-sm">🚚 Dispatched</button>
+          <button name="status" value="cancelled" class="btn btn-red btn-sm">❌ Cancel</button>
+          {% elif order.status == 'dispatched' %}
+          <button name="status" value="delivered" class="btn btn-green btn-sm">🎉 Delivered</button>
+          {% endif %}
+        </div>
       </form>
       {% endif %}
-      <button onclick="toggleReply('rf{{ enq.pk }}')" class="btn btn-outline btn-sm">{% if enq.reply %}Edit reply{% else %}Reply{% endif %}</button>
-      <a href="/farmer-start-chat/{{ enq.pk }}/" class="btn btn-green btn-sm">💬 Chat</a>
-    </div>
 
-    <div class="reply-form" id="rf{{ enq.pk }}">
-      <form method="post" style="margin-top:12px">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="reply_enquiry">
-        <input type="hidden" name="enquiry_id" value="{{ enq.pk }}">
-        <div class="fg"><textarea name="reply_message" class="fc" rows="3" placeholder="Write your reply to the buyer…">{{ enq.reply.message|default:'' }}</textarea></div>
-        <div style="display:flex;gap:8px"><button type="submit" class="btn btn-gold btn-sm">Send Reply</button><button type="button" onclick="toggleReply('rf{{ enq.pk }}')" class="btn btn-ghost btn-sm">Cancel</button></div>
-      </form>
+      {% if order.farmer_note %}
+      <div style="margin-top:8px;font-size:12px;color:var(--text3);">Your note: {{ order.farmer_note }}</div>
+      {% endif %}
+
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
   {% else %}
-  <div class="empty"><span class="empty-icon">📩</span><h3>No enquiries yet</h3><p>Buyers will contact you once they're interested in your crops.</p></div>
-  {% endif %}
-</div>
-
-<!-- TAB: CHATS -->
-<div class="tab-panel" data-group="dash" data-panel="dash" data-id="chats">
-  {% if chats %}
-  {% for chat in chats %}
-  <a href="/chat/{{ chat.pk }}/" class="chat-item">
-    <div class="chat-av">{{ chat.buyer.user.first_name|first|upper }}</div>
-    <div style="flex:1;min-width:0">
-      <div style="font-weight:700;color:var(--text);font-size:14px">{{ chat.buyer.user.get_full_name }}</div>
-      <div style="font-size:12.5px;color:var(--text3)">re: {{ chat.crop.name }}</div>
-    </div>
-    <div style="font-size:12px;color:var(--text3)">{{ chat.created|date:"M d" }}</div>
-  </a>
-  {% endfor %}
-  {% else %}
-  <div class="empty"><span class="empty-icon">💬</span><h3>No chats yet</h3><p>Start a chat from any enquiry.</p></div>
+  <div class="empty">
+    <span class="empty-icon">📦</span>
+    <h3>No orders yet</h3>
+    <p>Orders from buyers will appear here.</p>
+  </div>
   {% endif %}
 </div>
 
@@ -204,7 +216,7 @@
   </div>
   {% endfor %}
   {% else %}
-  <div class="empty"><span class="empty-icon">⭐</span><h3>No reviews yet</h3><p>Buyers can review your crops after enquiring.</p></div>
+  <div class="empty"><span class="empty-icon">⭐</span><h3>No reviews yet</h3><p>Reviews appear after buyers receive their orders.</p></div>
   {% endif %}
 </div>
 
@@ -212,30 +224,66 @@
 <div class="modal-overlay" id="addCropModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">List a New Crop</div>
+      <div class="modal-title">🌾 List a New Crop</div>
       <button class="modal-close" onclick="document.getElementById('addCropModal').classList.remove('open')">✕</button>
     </div>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="hidden" name="action" value="add_crop">
       <div class="fc-grid">
-        <div class="fg"><label class="lbl">Crop Name *</label><input type="text" name="name" class="fc" placeholder="e.g. Sweet Tomatoes" required></div>
-        <div class="fg"><label class="lbl">Category</label>
-          <select name="category" class="fc"><option value="">Select category</option>{% for cat in categories %}<option value="{{ cat.pk }}">{{ cat.icon }} {{ cat.name }}</option>{% endfor %}</select>
+        <div class="fg">
+          <label class="lbl">Crop Name *</label>
+          <input type="text" name="name" class="fc" placeholder="e.g. Sweet Tomatoes" required>
         </div>
-        <div class="fg"><label class="lbl">Price (₹) *</label><input type="text" name="price" class="fc" placeholder="e.g. 40" required></div>
-        <div class="fg"><label class="lbl">Unit</label>
-          <select name="unit" class="fc"><option value="kg">Kilogram</option><option value="quintal">Quintal</option><option value="ton">Ton</option><option value="dozen">Dozen</option><option value="piece">Piece</option></select>
+        <div class="fg">
+          <label class="lbl">Category</label>
+          <select name="category" class="fc">
+            <option value="">Select category</option>
+            {% for cat in categories %}<option value="{{ cat.pk }}">{{ cat.icon }} {{ cat.name }}</option>{% endfor %}
+          </select>
         </div>
-        <div class="fg"><label class="lbl">Quantity Available</label><input type="text" name="quantity" class="fc" placeholder="e.g. 200"></div>
-        <div class="fg"><label class="lbl">Status</label>
-          <select name="status" class="fc"><option value="available">Available</option><option value="unavailable">Unavailable</option></select>
+        <div class="fg">
+          <label class="lbl">Price (₹) *</label>
+          <input type="text" name="price" class="fc" placeholder="e.g. 40" required>
         </div>
-        <div class="fg"><label class="lbl">District</label><input type="text" name="district" class="fc" placeholder="e.g. Warangal" value="{{ farmer.district }}"></div>
-        <div class="fg"><label class="lbl">State</label><input type="text" name="state" class="fc" placeholder="e.g. Telangana" value="{{ farmer.state }}"></div>
+        <div class="fg">
+          <label class="lbl">Unit</label>
+          <select name="unit" class="fc">
+            <option value="kg">Kilogram</option>
+            <option value="quintal">Quintal</option>
+            <option value="ton">Ton</option>
+            <option value="dozen">Dozen</option>
+            <option value="piece">Piece</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="lbl">Quantity Available</label>
+          <input type="text" name="quantity" class="fc" placeholder="e.g. 200">
+        </div>
+        <div class="fg">
+          <label class="lbl">Status</label>
+          <select name="status" class="fc">
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="lbl">District</label>
+          <input type="text" name="district" class="fc" placeholder="e.g. Warangal" value="{{ farmer.district }}">
+        </div>
+        <div class="fg">
+          <label class="lbl">State</label>
+          <input type="text" name="state" class="fc" placeholder="e.g. Telangana" value="{{ farmer.state }}">
+        </div>
       </div>
-      <div class="fg"><label class="lbl">Description</label><textarea name="description" class="fc" rows="3" placeholder="Describe the crop quality, harvest date, etc."></textarea></div>
-      <div class="fg"><label class="lbl">Photo</label><input type="file" name="photo" class="fc" accept="image/*"></div>
+      <div class="fg">
+        <label class="lbl">Description</label>
+        <textarea name="description" class="fc" rows="3" placeholder="Describe the crop quality, harvest date, etc."></textarea>
+      </div>
+      <div class="fg">
+        <label class="lbl">Photo</label>
+        <input type="file" name="photo" class="fc" accept="image/*">
+      </div>
       <div class="fg" style="display:flex;align-items:center;gap:10px">
         <input type="checkbox" name="is_featured" value="1" id="feat" style="width:18px;height:18px;accent-color:var(--gold)">
         <label for="feat" style="font-size:14px;color:var(--text2);cursor:pointer">Mark as Featured</label>
@@ -248,7 +296,4 @@
   </div>
 </div>
 
-<script>
-function toggleReply(id){document.getElementById(id).classList.toggle('open')}
-</script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Category, Crop, FarmerProfile, BuyerProfile, Enquiry
+from .models import Category, Crop, FarmerProfile, BuyerProfile
 
 
 # ── CATEGORY SERIALIZER ───────────────────────────────
@@ -72,14 +72,3 @@ class CropDetailSerializer(serializers.ModelSerializer):
         return None
 
 
-# ── ENQUIRY SERIALIZER ────────────────────────────────
-class EnquirySerializer(serializers.ModelSerializer):
-    buyer_name = serializers.CharField(source='buyer.user.get_full_name')
-    crop_name  = serializers.CharField(source='crop.name')
-
-    class Meta:
-        model  = Enquiry
-        fields = [
-            'id', 'crop_name', 'buyer_name',
-            'message', 'phone', 'created', 'is_read'
-        ]

@@ -5,8 +5,6 @@
 .detail-wrap{display:grid;grid-template-columns:1fr 400px;gap:32px;align-items:start}
 .left-col{display:flex;flex-direction:column;gap:20px}
 .right-col{display:flex;flex-direction:column;gap:16px;position:sticky;top:84px}
-
-/* CROP HEADER CARD */
 .crop-header{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:32px}
 .crop-cat-tag{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px}
 .crop-title{font-family:var(--serif);font-size:38px;color:#fff;line-height:1.1;margin-bottom:16px;letter-spacing:-.5px}
@@ -21,30 +19,19 @@
 .detail-cell:nth-last-child(-n+2){border-bottom:none}
 .detail-cell-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:4px}
 .detail-cell-val{font-size:14px;color:#fff;font-weight:500}
-
-/* FARMER MINI CARD */
 .farmer-mini{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;align-items:center;gap:16px}
 .farmer-av{width:48px;height:48px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--bwarm);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--gold);flex-shrink:0}
-
-/* DESCRIPTION */
 .desc-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
-
-/* REVIEWS */
 .reviews-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
 .rating-row{display:flex;align-items:center;gap:20px;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--border)}
 .rating-big{font-family:var(--serif);font-size:56px;color:#fff;line-height:1}
 .review-item{padding:16px 0;border-bottom:1px solid var(--border)}
 .review-item:last-child{border-bottom:none}
-
-/* ACTION CARD */
 .action-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
 .star-picker{display:flex;gap:8px;margin-bottom:14px}
 .star-picker label{font-size:28px;color:var(--text3);cursor:pointer;transition:color var(--t) var(--ease)}
 .star-picker label:hover,.star-picker label.lit{color:var(--gold)}
-
-/* RELATED */
 .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:16px}
-
 @media(max-width:960px){
     .detail-wrap{grid-template-columns:1fr}
     .right-col{position:static}
@@ -57,7 +44,7 @@
 
 <div class="detail-wrap">
 
-    <!-- ── LEFT COLUMN ── -->
+    <!-- LEFT COLUMN -->
     <div class="left-col">
 
         <!-- CROP HEADER -->
@@ -71,72 +58,38 @@
                 {% if crop.is_featured %}<span class="badge bg-gold">⭐ Featured</span>{% endif %}
                 {% if crop.farmer.is_verified %}<span class="badge bg-blue">✓ Verified Farmer</span>{% endif %}
             </div>
+
             <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:20px;">
 
-            <!-- Crop Image -->
-            <div>
-                {% if crop.photo %}
-
-                <img src="{{ crop.photo.url }}"
-                    alt="{{ crop.name }}"
-                    style="
-                        width:180px;
-                        height:180px;
-                        object-fit:cover;
-                        border-radius:18px;
-                        border:1px solid var(--border);
-                    ">
-
-            {% else %}
-
-                <div style="
-                    width:180px;
-                    height:180px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-size:80px;
-                    border-radius:18px;
-                    background:#1b1712;
-                    border:1px solid var(--border);
-                " data-crop="{{ crop.name }}">
-                    {{ crop.category.icon|default:"🌿" }}
+                <!-- CROP IMAGE -->
+                <div>
+                    {% if crop.photo %}
+                    <img src="{{ crop.photo.url }}" alt="{{ crop.name }}" style="width:180px;height:180px;object-fit:cover;border-radius:18px;border:1px solid var(--border);">
+                    {% else %}
+                    <div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;font-size:80px;border-radius:18px;background:#1b1712;border:1px solid var(--border);" data-crop="{{ crop.name }}">
+                        {{ crop.category.icon|default:"🌿" }}
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
+
+                <!-- PRICE -->
+                <div style="flex:1;">
+                    <div class="crop-price-row">
+                        <span class="crop-price">₹{{ crop.price }}</span>
+                        <span class="crop-unit">per {{ crop.unit }}</span>
+                    </div>
+                    {% if crop.quantity %}
+                    <div class="crop-qty">📦 {{ crop.quantity }} {{ crop.unit }} available</div>
+                    {% endif %}
+                    {% if avg_rating %}
+                    <div style="margin-top:10px;color:var(--gold);font-size:16px;font-weight:600;">
+                        ★ {{ avg_rating }}
+                        <span style="color:var(--text3);font-size:13px;">({{ crop.rating_count }} reviews)</span>
+                    </div>
+                    {% endif %}
+                </div>
 
             </div>
-
-            <!-- Price Section -->
-            <div style="flex:1;">
-
-                <div class="crop-price-row">
-                    <span class="crop-price">₹{{ crop.price }}</span>
-                    <span class="crop-unit">per {{ crop.unit }}</span>
-                </div>
-
-                {% if crop.quantity %}
-                <div class="crop-qty">
-                    📦 {{ crop.quantity }} {{ crop.unit }} available
-                </div>
-                {% endif %}
-
-                {% if avg_rating %}
-                <div style="
-                    margin-top:10px;
-                    color:var(--gold);
-                    font-size:16px;
-                    font-weight:600;
-                ">
-                    ★ {{ avg_rating }}
-                    <span style="color:var(--text3);font-size:13px;">
-                        ({{ crop.rating_count }} reviews)
-                    </span>
-                </div>
-                {% endif %}
-
-            </div>
-
-        </div>
 
             <!-- DETAILS GRID -->
             <div class="detail-grid">
@@ -155,17 +108,6 @@
                     <div class="detail-cell-label">Rating</div>
                     <div class="detail-cell-val" style="color:var(--gold)">★ {{ avg_rating }} <span style="color:var(--text3);font-size:12px">({{ crop.rating_count }} reviews)</span></div>
                 </div>
-                {% endif %}
-                {% if crop.wishlist_count %}
-                <div class="detail-cell">
-                    <div class="detail-cell-label">Saved by</div>
-                    <div class="detail-cell-val">❤️ {{ crop.wishlist_count }} buyer{{ crop.wishlist_count|pluralize }}</div>
-                </div>
-                {% endif %}
-                {% if is_buyer and crop.status == 'available' %}
-                <a href="/crop/{{ crop.pk }}/order/" class="btn btn-green" style="justify-content:center">
-                    🛒 Place Order
-                </a>
                 {% endif %}
             </div>
         </div>
@@ -224,9 +166,12 @@
             <p style="color:var(--text3);font-size:14px">No reviews yet. Be the first!</p>
             {% endfor %}
 
-            {% if is_buyer and has_enquiry %}
+            <!-- LEAVE REVIEW — only after delivered order -->
+            {% if is_buyer and has_delivered_order %}
             <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
-                <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:14px">{% if user_rating %}Update your review{% else %}Leave a review{% endif %}</div>
+                <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:14px">
+                    {% if user_rating %}Update your review{% else %}Leave a review{% endif %}
+                </div>
                 <form method="post" action="/crop/{{ crop.pk }}/rate/">
                     {% csrf_token %}
                     <div class="star-picker" id="starPicker">
@@ -236,7 +181,9 @@
                         </label>
                         {% endfor %}
                     </div>
-                    <div class="fg"><textarea name="review" class="fc" rows="3" placeholder="Describe your experience (optional)…">{{ user_rating.review|default:'' }}</textarea></div>
+                    <div class="fg">
+                        <textarea name="review" class="fc" rows="3" placeholder="Describe your experience (optional)…">{{ user_rating.review|default:'' }}</textarea>
+                    </div>
                     <div style="display:flex;gap:10px;margin-top:12px">
                         <button type="submit" class="btn btn-gold btn-sm">{% if user_rating %}Update{% else %}Submit review{% endif %}</button>
                         {% if user_rating %}<a href="/crop/{{ crop.pk }}/rate/delete/" class="btn btn-red btn-sm">Remove</a>{% endif %}
@@ -244,6 +191,7 @@
                 </form>
             </div>
             {% endif %}
+
         </div>
 
         <!-- RELATED -->
@@ -253,7 +201,13 @@
             <div class="related-grid">
                 {% for r in related %}
                 <a href="/crop/{{ r.pk }}/" class="cc">
-                    <div class="cc-img">{% if r.photo %}<img src="{{ r.photo.url }}" alt="{{ r.name }}">{% else %}<span data-crop="{{ r.name }}">{{ r.category.icon|default:"🌿" }}</span>{% endif %}</div>                    
+                    <div class="cc-img">
+                        {% if r.photo %}
+                        <img src="{{ r.photo.url }}" alt="{{ r.name }}">
+                        {% else %}
+                        <span data-crop="{{ r.name }}">{{ r.category.icon|default:"🌿" }}</span>
+                        {% endif %}
+                    </div>
                     <div class="cc-body">
                         <div class="cc-foot" style="margin-bottom:6px;">
                             <div class="cc-name" style="margin:0;">{{ r.name }}</div>
@@ -268,59 +222,33 @@
 
     </div>
 
-    <!-- ── RIGHT COLUMN (STICKY) ── -->
+    <!-- RIGHT COLUMN -->
     <div class="right-col">
 
-        <!-- ACTIONS -->
+        <!-- QUICK ACTIONS -->
         <div class="action-card">
             <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:16px">Quick Actions</div>
-
             {% if user.is_authenticated %}
                 {% if is_buyer %}
                 <div style="display:flex;flex-direction:column;gap:10px">
-                    <a href="/crop/{{ crop.pk }}/wishlist/" class="btn {% if is_wishlisted %}btn-gold{% else %}btn-ghost{% endif %}" style="justify-content:center">
-                        {% if is_wishlisted %}❤️ Wishlisted{% else %}🤍 Save to Wishlist{% endif %}
-                    </a>
-                    {% if chat_room %}
-                    <a href="/chat/{{ chat_room.pk }}/" class="btn btn-green" style="justify-content:center">💬 Continue Chat</a>
+                    {% if crop.status == 'available' %}
+                    {% if in_cart %}
+                    <a href="/cart/" class="btn btn-gold" style="justify-content:center">🛒 View Cart</a>
                     {% else %}
-                    <a href="/start-chat/{{ crop.pk }}/" class="btn btn-ghost" style="justify-content:center">💬 Chat with Farmer</a>
+                    <a href="/cart/add/{{ crop.pk }}/" class="btn btn-gold" style="justify-content:center">🛒 Add to Cart</a>
+                    {% endif %}
                     {% endif %}
                 </div>
                 {% endif %}
                 {% if is_farmer %}
-                <div class="badge bg-muted" style="text-align:center;padding:12px">Farmers cannot send enquiries</div>
+                <div class="badge bg-muted" style="text-align:center;padding:12px">You are the farmer of this crop</div>
                 {% endif %}
             {% else %}
-            <a href="/login/" class="btn btn-gold" style="width:100%;justify-content:center">Login to Enquire</a>
+            <a href="/login/" class="btn btn-gold" style="width:100%;justify-content:center">Login to Continue</a>
             {% endif %}
         </div>
 
-        <!-- ENQUIRY FORM -->
-        {% if is_buyer and crop.status == 'available' %}
-        <div class="action-card">
-            <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:16px">
-                📩 {% if has_enquiry %}Send another enquiry{% else %}Send Enquiry{% endif %}
-            </div>
-            {% if has_enquiry %}
-            <div class="badge bg-green" style="margin-bottom:14px;display:block">✓ You've enquired about this crop</div>
-            {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                <div class="fg">
-                    <label class="lbl">Your message</label>
-                    <textarea name="message" class="fc" rows="3" placeholder="e.g. I'm interested in buying 50kg of {{ crop.name }}..." required></textarea>
-                </div>
-                <div class="fg">
-                    <label class="lbl">Phone number</label>
-                    <input type="tel" name="phone" class="fc" placeholder="+91 99999 99999">
-                </div>
-                <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;margin-top:4px">Send Enquiry →</button>
-            </form>
-        </div>
-        {% endif %}
-
-        <!-- PRICE SUMMARY BOX -->
+        <!-- PRICE SUMMARY -->
         <div style="background:rgba(240,160,32,.06);border:1px solid var(--bwarm);border-radius:var(--rl);padding:20px">
             <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px">Price Summary</div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -334,15 +262,17 @@
             </div>
             {% endif %}
             <div style="height:1px;background:var(--bwarm);margin:12px 0"></div>
-            <div style="font-size:12px;color:var(--text3);line-height:1.6">💡 Price is negotiable. Send an enquiry to discuss bulk pricing with the farmer.</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.6">💡 Add to cart and proceed to checkout to place your order.</div>
         </div>
 
     </div>
+
 </div>
 
 <script>
 (function(){
     const labels = document.querySelectorAll('#starPicker label');
+    if(!labels.length) return;
     let sel = Number("{{ user_rating.stars|default:0 }}");
     function light(n){labels.forEach((l,i)=>l.classList.toggle('lit',i<n))}
     labels.forEach((l,i)=>{

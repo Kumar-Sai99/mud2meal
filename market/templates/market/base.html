@@ -218,7 +218,6 @@
         <a href="/dashboard/"    class="di">📊 Dashboard</a>
         <a href="/edit-profile/" class="di">✏️ Edit Profile</a>
         <a href="/crops/"        class="di">🌾 Browse Crops</a>
-        {% if is_buyer %}<a href="/wishlist/" class="di">❤️ Wishlist</a>{% endif %}
         <div class="dsep"></div>
         <a href="/logout/" class="di red">🚪 Logout</a>
       </div>
@@ -249,6 +248,15 @@
   <p>🌾 <strong>Mud2Meal</strong> — From the farmer's hands to your heart</p>
   <p style="margin-top:6px">© 2026 Mud2Meal. All rights reserved.</p>
 </footer>
+
+{% if is_buyer %}
+<li>
+    <a href="/cart/" class="btn btn-ghost btn-sm" style="gap:6px;">
+        🛒
+        {% if cart_count %}<span style="background:var(--gold);color:#000;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;">{{ cart_count }}</span>{% endif %}
+    </a>
+</li>
+{% endif %}
 
 <script>
 /* ── SMART CROP EMOJI ENGINE ── */

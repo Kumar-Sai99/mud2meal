@@ -1,25 +1,33 @@
 {% extends 'market/base.html' %}
-{% block title %}Place Order — {{ crop.name }}{% endblock %}
+{% block title %}Checkout — Mud2Meal{% endblock %}
 {% block content %}
-<a href="/crop/{{ crop.pk }}/" class="back">← Back</a>
+<a href="/cart/" class="back">← Back to Cart</a>
 
-<div style="max-width:560px; margin:0 auto;">
+<div style="max-width:600px; margin:0 auto;">
     <div style="text-align:center; margin-bottom:32px;">
-        <div style="font-size:48px; margin-bottom:12px;" data-crop="{{ crop.name }}">{{ crop.category.icon|default:"🌿" }}</div>
-        <h1 style="font-family:var(--serif); font-size:32px; color:#fff;">Order {{ crop.name }}</h1>
-        <p style="color:var(--text3); margin-top:8px;">₹{{ crop.price }} per {{ crop.unit }} · {{ crop.district }}</p>
+        <h1 style="font-family:var(--serif); font-size:36px; color:#fff;">Checkout</h1>
+        <p style="color:var(--text3); margin-top:8px;">{{ items.count }} item{{ items.count|pluralize }} · ₹{{ total|floatformat:0 }} total</p>
     </div>
 
     <form method="post">
         {% csrf_token %}
 
-        <!-- QUANTITY -->
+        <!-- ORDER ITEMS SUMMARY -->
         <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:16px;">
-            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">📦 Quantity</div>
-            <div style="display:flex; align-items:center; gap:16px;">
-                <input type="number" name="quantity" min="1" value="1" class="fc" style="width:120px; font-size:20px; text-align:center; font-weight:700;">
-                <span style="color:var(--text3); font-size:14px;">{{ crop.unit }}(s)</span>
-                <span style="margin-left:auto; font-family:var(--serif); font-size:24px; color:var(--gold);" id="totalPrice">₹{{ crop.price }}</span>
+            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">🛒 Items</div>
+            {% for item in items %}
+            <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border);">
+                <span style="font-size:24px;" data-crop="{{ item.crop.name }}">{{ item.crop.category.icon|default:"🌿" }}</span>
+                <div style="flex:1;">
+                    <div style="color:#fff; font-weight:600;">{{ item.crop.name }}</div>
+                    <div style="font-size:12px; color:var(--text3);">{{ item.quantity }} {{ item.crop.unit }} · 🌾 {{ item.crop.farmer.user.get_full_name }}</div>
+                </div>
+                <div style="font-family:var(--serif); color:var(--gold);">₹{{ item.subtotal|floatformat:0 }}</div>
+            </div>
+            {% endfor %}
+            <div style="display:flex; justify-content:space-between; margin-top:14px;">
+                <span style="font-weight:700; color:#fff;">Total</span>
+                <span style="font-family:var(--serif); font-size:22px; color:var(--gold);">₹{{ total|floatformat:0 }}</span>
             </div>
         </div>
 
@@ -29,23 +37,21 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 <label style="cursor:pointer;">
                     <input type="radio" name="delivery" value="pickup" style="display:none;" onchange="toggleAddress(false)" checked>
-                    <div class="delivery-opt" id="opt-pickup" style="border:2px solid var(--gold); background:var(--gold-dim); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
+                    <div id="opt-pickup" style="border:2px solid var(--gold); background:var(--gold-dim); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">🚶</div>
-                        <div style="font-weight:700; color:#fff; font-size:15px;">Self Pickup</div>
+                        <div style="font-weight:700; color:#fff;">Self Pickup</div>
                         <div style="font-size:12px; color:var(--text3); margin-top:4px;">Collect from farmer</div>
                     </div>
                 </label>
                 <label style="cursor:pointer;">
                     <input type="radio" name="delivery" value="delivery" style="display:none;" onchange="toggleAddress(true)">
-                    <div class="delivery-opt" id="opt-delivery" style="border:2px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
+                    <div id="opt-delivery" style="border:2px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">🚚</div>
-                        <div style="font-weight:700; color:#fff; font-size:15px;">Home Delivery</div>
+                        <div style="font-weight:700; color:#fff;">Home Delivery</div>
                         <div style="font-size:12px; color:var(--text3); margin-top:4px;">Farmer delivers to you</div>
                     </div>
                 </label>
             </div>
-
-            <!-- ADDRESS (shown for delivery) -->
             <div id="addressBox" style="display:none; margin-top:16px;">
                 <label class="lbl">Your Delivery Address</label>
                 <textarea name="address" class="fc" rows="3" placeholder="House no, Street, City, Pincode…"></textarea>
@@ -58,20 +64,18 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 <label style="cursor:pointer;">
                     <input type="radio" name="payment" value="cod" style="display:none;" onchange="selectPayment('cod')" checked>
-                    <div class="payment-opt" id="pay-cod" style="border:2px solid var(--gold); background:var(--gold-dim); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
+                    <div id="pay-cod" style="border:2px solid var(--gold); background:var(--gold-dim); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">💵</div>
-                        <div style="font-weight:700; color:#fff; font-size:15px;">Cash on Delivery</div>
-                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Pay when you receive</div>
+                        <div style="font-weight:700; color:#fff;">Cash on Delivery</div>
+                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Pay when received</div>
                     </div>
                 </label>
                 <label style="cursor:pointer;">
                     <input type="radio" name="payment" value="upi" style="display:none;" onchange="selectPayment('upi')">
-                    <div class="payment-opt" id="pay-upi" style="border:2px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
+                    <div id="pay-upi" style="border:2px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">📱</div>
-                        <div style="font-weight:700; color:#fff; font-size:15px;">UPI</div>
-                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">
-                            {% if crop.farmer.upi_id %}{{ crop.farmer.upi_id }}{% else %}Pay via UPI{% endif %}
-                        </div>
+                        <div style="font-weight:700; color:#fff;">UPI</div>
+                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Pay via UPI</div>
                     </div>
                 </label>
             </div>
@@ -79,30 +83,22 @@
 
         <!-- NOTE -->
         <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:24px;">
-            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">📝 Note (Optional)</div>
-            <textarea name="note" class="fc" rows="2" placeholder="Any special instructions for the farmer…"></textarea>
+            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:12px;">📝 Note (Optional)</div>
+            <textarea name="note" class="fc" rows="2" placeholder="Any special instructions…"></textarea>
         </div>
 
         <button type="submit" class="btn btn-gold btn-lg" style="width:100%; justify-content:center;">
-            Confirm Order →
+            Place Order →
         </button>
     </form>
 </div>
 
 <script>
-const unitPrice = parseFloat("{{ crop.price }}") || 0;
-
-document.querySelector('input[name="quantity"]').addEventListener('input', function(){
-    const qty = parseInt(this.value) || 1;
-    document.getElementById('totalPrice').textContent = '₹' + (unitPrice * qty).toLocaleString('en-IN');
-});
-
 function toggleAddress(show){
     document.getElementById('addressBox').style.display = show ? 'block' : 'none';
     document.getElementById('opt-pickup').style.cssText   = !show ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
     document.getElementById('opt-delivery').style.cssText = show  ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
 }
-
 function selectPayment(type){
     document.getElementById('pay-cod').style.cssText = type==='cod' ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
     document.getElementById('pay-upi').style.cssText = type==='upi' ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';

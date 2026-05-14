@@ -3,10 +3,10 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Crop, Category, Enquiry, FarmerProfile
+from .models import Crop, Category, FarmerProfile
 from .serializers import (
     CropListSerializer, CropDetailSerializer,
-    CategorySerializer, EnquirySerializer
+    CategorySerializer, 
 )
 
 
@@ -136,28 +136,3 @@ def api_my_crops(request):
     })
 
 
-# ── ENQUIRIES API ─────────────────────────────────────
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def api_my_enquiries(request):
-    """
-    GET /api/my-enquiries/
-    Returns logged-in farmer's enquiries.
-    Requires login.
-    """
-    try:
-        farmer = request.user.farmer
-    except:
-        return Response(
-            {'error': 'Only farmers can access this.'},
-            status=status.HTTP_403_FORBIDDEN
-        )
-
-    enquiries  = Enquiry.objects.filter(
-        crop__farmer=farmer
-    ).select_related('buyer__user', 'crop').order_by('-created')
-    serializer = EnquirySerializer(enquiries, many=True)
-    return Response({
-        'count'    : enquiries.count(),
-        'enquiries': serializer.data,
-    })
