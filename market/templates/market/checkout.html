@@ -3,10 +3,14 @@
 {% block content %}
 <a href="/cart/" class="back">← Back to Cart</a>
 
-<div style="max-width:600px; margin:0 auto;">
+<div style="max-width:640px; margin:0 auto;">
+
+    <!-- HEADER -->
     <div style="text-align:center; margin-bottom:32px;">
         <h1 style="font-family:var(--serif); font-size:36px; color:#fff;">Checkout</h1>
-        <p style="color:var(--text3); margin-top:8px;">{{ items.count }} item{{ items.count|pluralize }} · ₹{{ total|floatformat:0 }} total</p>
+        <p style="color:var(--text3); margin-top:8px;">
+            {{ items.count }} item{{ items.count|pluralize }} · ₹{{ total|floatformat:0 }} total
+        </p>
     </div>
 
     <form method="post">
@@ -14,94 +18,154 @@
 
         <!-- ORDER ITEMS SUMMARY -->
         <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:16px;">
-            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">🛒 Items</div>
+            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">🛒 Order Summary</div>
+
             {% for item in items %}
-            <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border);">
-                <span style="font-size:24px;" data-crop="{{ item.crop.name }}">{{ item.crop.category.icon|default:"🌿" }}</span>
-                <div style="flex:1;">
-                    <div style="color:#fff; font-weight:600;">{{ item.crop.name }}</div>
-                    <div style="font-size:12px; color:var(--text3);">{{ item.quantity }} {{ item.crop.unit }} · 🌾 {{ item.crop.farmer.user.get_full_name }}</div>
+            <div style="display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--border);">
+
+                <!-- EMOJI -->
+                <div style="width:44px; height:44px; background:var(--surface); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid var(--border); flex-shrink:0;">
+                    <span data-crop="{{ item.crop.name }}">{{ item.crop.category.icon|default:"🌿" }}</span>
                 </div>
-                <div style="font-family:var(--serif); color:var(--gold);">₹{{ item.subtotal|floatformat:0 }}</div>
+
+                <!-- INFO -->
+                <div style="flex:1;">
+                    <div style="color:#fff; font-weight:700; font-size:15px;">{{ item.crop.name }}</div>
+                    <div style="font-size:12px; color:var(--text3); margin-top:3px;">
+                        {{ item.quantity }} {{ item.crop.unit }} × ₹{{ item.crop.price }}
+                    </div>
+                    <div style="font-size:12px; color:var(--text3); margin-top:2px;">
+                        🌾 {{ item.crop.farmer.user.get_full_name }} · 📍 {{ item.crop.district }}
+                    </div>
+                </div>
+
+                <!-- SUBTOTAL -->
+                <div style="font-family:var(--serif); font-size:18px; color:var(--gold); flex-shrink:0;">
+                    ₹{{ item.subtotal|floatformat:0 }}
+                </div>
+
             </div>
             {% endfor %}
-            <div style="display:flex; justify-content:space-between; margin-top:14px;">
-                <span style="font-weight:700; color:#fff;">Total</span>
-                <span style="font-family:var(--serif); font-size:22px; color:var(--gold);">₹{{ total|floatformat:0 }}</span>
+
+            <!-- TOTAL -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:4px;">
+                <span style="font-weight:700; color:#fff; font-size:15px;">Total Amount</span>
+                <span style="font-family:var(--serif); font-size:26px; color:var(--gold);">₹{{ total|floatformat:0 }}</span>
             </div>
         </div>
 
-        <!-- DELIVERY -->
+        <!-- DELIVERY METHOD -->
         <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:16px;">
             <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">🚚 Delivery Method</div>
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+
+                <!-- PICKUP -->
                 <label style="cursor:pointer;">
                     <input type="radio" name="delivery" value="pickup" style="display:none;" onchange="toggleAddress(false)" checked>
                     <div id="opt-pickup" style="border:2px solid var(--gold); background:var(--gold-dim); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">🚶</div>
-                        <div style="font-weight:700; color:#fff;">Self Pickup</div>
-                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Collect from farmer</div>
+                        <div style="font-weight:700; color:#fff; font-size:15px;">Self Pickup</div>
+                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Collect directly from farmer</div>
                     </div>
                 </label>
+
+                <!-- HOME DELIVERY -->
                 <label style="cursor:pointer;">
                     <input type="radio" name="delivery" value="delivery" style="display:none;" onchange="toggleAddress(true)">
                     <div id="opt-delivery" style="border:2px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">🚚</div>
-                        <div style="font-weight:700; color:#fff;">Home Delivery</div>
+                        <div style="font-weight:700; color:#fff; font-size:15px;">Home Delivery</div>
                         <div style="font-size:12px; color:var(--text3); margin-top:4px;">Farmer delivers to you</div>
                     </div>
                 </label>
+
             </div>
+
+            <!-- ADDRESS BOX — shown for home delivery -->
             <div id="addressBox" style="display:none; margin-top:16px;">
                 <label class="lbl">Your Delivery Address</label>
-                <textarea name="address" class="fc" rows="3" placeholder="House no, Street, City, Pincode…"></textarea>
+                <textarea name="address" class="fc" rows="3"
+                    placeholder="House no, Street, City, Pincode…">{{ request.user.buyer.delivery_address }}</textarea>
+                <div style="font-size:12px; color:var(--text3); margin-top:6px;">
+                    💡 This is auto-filled from your profile. Edit if different.
+                </div>
             </div>
         </div>
 
-        <!-- PAYMENT -->
+        <!-- PAYMENT METHOD -->
         <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:16px;">
             <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">💳 Payment Method</div>
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+
+                <!-- CASH ON DELIVERY -->
                 <label style="cursor:pointer;">
                     <input type="radio" name="payment" value="cod" style="display:none;" onchange="selectPayment('cod')" checked>
                     <div id="pay-cod" style="border:2px solid var(--gold); background:var(--gold-dim); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">💵</div>
-                        <div style="font-weight:700; color:#fff;">Cash on Delivery</div>
-                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Pay when received</div>
+                        <div style="font-weight:700; color:#fff; font-size:15px;">Cash on Delivery</div>
+                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Pay when you receive</div>
                     </div>
                 </label>
+
+                <!-- UPI -->
                 <label style="cursor:pointer;">
                     <input type="radio" name="payment" value="upi" style="display:none;" onchange="selectPayment('upi')">
                     <div id="pay-upi" style="border:2px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s;">
                         <div style="font-size:32px; margin-bottom:8px;">📱</div>
-                        <div style="font-weight:700; color:#fff;">UPI</div>
-                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Pay via UPI</div>
+                        <div style="font-weight:700; color:#fff; font-size:15px;">UPI</div>
+                        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Pay via UPI to farmer</div>
                     </div>
                 </label>
+
             </div>
         </div>
 
         <!-- NOTE -->
         <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:24px;">
-            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:12px;">📝 Note (Optional)</div>
-            <textarea name="note" class="fc" rows="2" placeholder="Any special instructions…"></textarea>
+            <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:12px;">📝 Note to Farmer (Optional)</div>
+            <textarea name="note" class="fc" rows="3"
+                placeholder="e.g. Please pack carefully, I need it by evening…"></textarea>
         </div>
 
-        <button type="submit" class="btn btn-gold btn-lg" style="width:100%; justify-content:center;">
+        <!-- IMPORTANT INFO -->
+        <div style="background:rgba(240,160,32,.06); border:1px solid var(--bwarm); border-radius:var(--rl); padding:16px 20px; margin-bottom:24px;">
+            <div style="font-size:13px; color:var(--gold); font-weight:700; margin-bottom:8px;">⚠️ Before you place order</div>
+            <ul style="font-size:13px; color:var(--text2); line-height:1.9; padding-left:16px;">
+                <li>You can cancel the order within <strong style="color:#fff;">1 hour</strong> of placing it</li>
+                <li>Farmer contact details will be shared after confirmation</li>
+                <li>UPI payment should be made directly to the farmer's UPI ID</li>
+                <li>Price is as listed — contact farmer via order notes for bulk deals</li>
+            </ul>
+        </div>
+
+        <!-- PLACE ORDER BUTTON -->
+        <button type="submit" class="btn btn-gold btn-lg" style="width:100%; justify-content:center; font-size:16px;">
             Place Order →
         </button>
+
+        <div style="text-align:center; margin-top:12px;">
+            <a href="/cart/" style="font-size:13px; color:var(--text3); text-decoration:none;">← Go back to cart</a>
+        </div>
+
     </form>
 </div>
 
 <script>
-function toggleAddress(show){
+const SEL   = 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
+const UNSEL = 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
+
+function toggleAddress(show) {
     document.getElementById('addressBox').style.display = show ? 'block' : 'none';
-    document.getElementById('opt-pickup').style.cssText   = !show ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
-    document.getElementById('opt-delivery').style.cssText = show  ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
+    document.getElementById('opt-pickup').style.cssText   = show ? UNSEL : SEL;
+    document.getElementById('opt-delivery').style.cssText = show ? SEL   : UNSEL;
 }
-function selectPayment(type){
-    document.getElementById('pay-cod').style.cssText = type==='cod' ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
-    document.getElementById('pay-upi').style.cssText = type==='upi' ? 'border:2px solid var(--gold);background:var(--gold-dim);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;' : 'border:2px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.2s;';
+
+function selectPayment(type) {
+    document.getElementById('pay-cod').style.cssText = type === 'cod' ? SEL : UNSEL;
+    document.getElementById('pay-upi').style.cssText = type === 'upi' ? SEL : UNSEL;
 }
 </script>
+
 {% endblock %}

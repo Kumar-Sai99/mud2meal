@@ -47,7 +47,10 @@
       </div>
       <div class="fg"><label class="lbl">Bio</label><textarea name="bio" class="fc" rows="3" placeholder="Tell buyers about your farm…">{{ user.farmer.bio }}</textarea></div>
       <div class="fg"><label class="lbl">Profile Photo</label><input type="file" name="photo" class="fc" accept="image/*"></div>
-    </div>
+    <div class="fg"><label class="lbl">UPI ID</label><input type="text" name="upi_id" class="fc" placeholder="e.g. yourname@upi" value="{% if request.user.farmer %}{{ request.user.farmer.upi_id }}{% endif %}">
+  </div>
+  </div>
+    
     {% endif %}
 
     <!-- BUYER EXTRAS -->

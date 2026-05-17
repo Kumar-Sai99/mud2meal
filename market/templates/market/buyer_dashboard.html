@@ -2,92 +2,198 @@
 {% block title %}Buyer Dashboard — Mud2Meal{% endblock %}
 {% block content %}
 
+<!-- HEADER -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px">
-  <div>
-    <div style="font-family:var(--serif);font-size:30px;color:var(--text)">Welcome, <span style="color:var(--gold);font-style:italic">{{ buyer.user.first_name }}</span> 🛒</div>
-    <div style="font-size:14px;color:var(--text3);margin-top:4px">Track your orders and reviews</div>
-  </div>
-  <div style="display:flex;gap:10px;">
-    <a href="/cart/" class="btn btn-ghost">🛒 My Cart</a>
-    <a href="/crops/" class="btn btn-gold">Browse Crops</a>
-  </div>
+    <div>
+        <div style="font-family:var(--serif);font-size:30px;color:var(--text)">
+            Welcome, <span style="color:var(--gold);font-style:italic">{{ buyer.user.first_name }}</span> 🛒
+        </div>
+        <div style="font-size:14px;color:var(--text3);margin-top:4px">
+            Track your orders and reviews
+        </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+        <a href="/cart/" class="btn btn-ghost">
+            🛒 My Cart
+            {% if cart_count %}
+            <span style="background:var(--gold);color:#000;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-left:4px;">{{ cart_count }}</span>
+            {% endif %}
+        </a>
+        <a href="/crops/" class="btn btn-gold">Browse Crops</a>
+    </div>
 </div>
 
 <!-- STATS -->
 <div class="g-stats">
-  <div class="sc"><div class="sc-num">{{ order_count }}</div><div class="sc-lbl">Orders Placed</div></div>
-  <div class="sc"><div class="sc-num" style="color:var(--gold)">{{ orders|length }}</div><div class="sc-lbl">Active Orders</div></div>
-  <div class="sc"><div class="sc-num" style="color:var(--text2)">{{ my_ratings.count }}</div><div class="sc-lbl">Reviews Given</div></div>
+    <div class="sc">
+        <div class="sc-num">{{ order_count }}</div>
+        <div class="sc-lbl">Orders Placed</div>
+    </div>
+    <div class="sc">
+        <div class="sc-num" style="color:var(--gold)">{{ active_orders }}</div>
+        <div class="sc-lbl">Active Orders</div>
+    </div>
+    <div class="sc">
+        <div class="sc-num" style="color:var(--green-l)">{{ delivered_count }}</div>
+        <div class="sc-lbl">Delivered</div>
+    </div>
+    <div class="sc">
+        <div class="sc-num" style="color:var(--text2)">{{ my_ratings.count }}</div>
+        <div class="sc-lbl">Reviews Given</div>
+    </div>
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab active" data-group="bd" data-tab="orders"  onclick="switchTab('bd','orders')">📦 Orders ({{ order_count }})</button>
-  <button class="tab"        data-group="bd" data-tab="reviews" onclick="switchTab('bd','reviews')">⭐ My Reviews</button>
+    <button class="tab active" data-group="bd" data-tab="orders"
+            onclick="switchTab('bd','orders')">
+        📦 Orders ({{ order_count }})
+    </button>
+    <button class="tab" data-group="bd" data-tab="reviews"
+            onclick="switchTab('bd','reviews')">
+        ⭐ My Reviews ({{ my_ratings.count }})
+    </button>
 </div>
 
 <!-- TAB: ORDERS -->
 <div class="tab-panel active" data-group="bd" data-panel="bd" data-id="orders">
-  {% if orders %}
-  <div style="display:flex;flex-direction:column;gap:14px;">
-    {% for order in orders %}
-    <a href="/order/{{ order.pk }}/" style="text-decoration:none;">
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;align-items:center;gap:16px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--bwarm)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="width:52px;height:52px;background:var(--surface);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;border:1px solid var(--border);flex-shrink:0;">
-        <span data-crop="{{ order.crop.name }}">{{ order.crop.category.icon|default:"🌿" }}</span>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-family:var(--serif);font-size:17px;color:#fff;">{{ order.crop.name }}</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:3px;">
-          {{ order.quantity }} {{ order.crop.unit }} ·
-          {% if order.delivery == 'pickup' %}🚶 Pickup{% else %}🚚 Delivery{% endif %} ·
-          {% if order.payment == 'cod' %}💵 COD{% else %}📱 UPI{% endif %}
+    {% if orders %}
+    <div style="display:flex;flex-direction:column;gap:14px;">
+        {% for order in orders %}
+        <a href="/order/{{ order.pk }}/" style="text-decoration:none;">
+           <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;align-items:center;gap:16px;transition:border-color 0.2s;"
+            onmouseover="this.style.borderColor='rgba(240,160,32,.3)'"
+            onmouseout="this.style.borderColor='rgba(255,255,255,0.10)'">
+
+            <!-- CROP IMAGE OR EMOJI -->
+            <div style="width:56px;height:56px;background:var(--surface);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;border:1px solid var(--border);flex-shrink:0;overflow:hidden;">
+                {% if order.crop.photo %}
+                <img src="{{ order.crop.photo.url }}" alt="{{ order.crop.name }}"
+                     style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                <span data-crop="{{ order.crop.name }}">{{ order.crop.category.icon|default:"🌿" }}</span>
+                {% endif %}
+            </div>
+
+            <!-- ORDER INFO -->
+            <div style="flex:1;min-width:0;">
+                <div style="font-family:var(--serif);font-size:17px;color:#fff;margin-bottom:4px;">
+                    {{ order.crop.name }}
+                </div>
+                <div style="font-size:12px;color:var(--text3);">
+                    {{ order.quantity }} {{ order.crop.unit }} ·
+                    {% if order.delivery == 'pickup' %}🚶 Pickup{% else %}🚚 Delivery{% endif %} ·
+                    {% if order.payment == 'cod' %}💵 COD{% else %}📱 UPI{% endif %}
+                </div>
+                <div style="font-size:12px;color:var(--text3);margin-top:2px;">
+                    🌾 {{ order.farmer.user.get_full_name }} · {{ order.created_at|date:"M d, Y" }}
+                </div>
+                {% if order.farmer_note %}
+                <div style="font-size:12px;color:var(--gold);margin-top:6px;background:var(--gold-dim);border-radius:6px;padding:4px 10px;display:inline-block;">
+                    💬 {{ order.farmer_note }}
+                </div>
+                {% endif %}
+                {% if order.status == 'delivered' %}
+                <div style="font-size:12px;color:var(--green-l);margin-top:4px;">
+                    ✅ Delivered — <a href="/crop/{{ order.crop.pk }}/" style="color:var(--gold);text-decoration:none;">Leave a review →</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- PRICE + STATUS -->
+            <div style="text-align:right;flex-shrink:0;">
+                <div style="font-family:var(--serif);font-size:20px;color:var(--gold);margin-bottom:6px;">
+                    ₹{{ order.total_price }}
+                </div>
+                <span class="badge
+                    {% if order.status == 'pending' %}bg-muted
+                    {% elif order.status == 'confirmed' %}bg-blue
+                    {% elif order.status == 'dispatched' %}bg-gold
+                    {% elif order.status == 'delivered' %}bg-green
+                    {% else %}bg-red{% endif %}">
+                    {% if order.status == 'pending' %}⏳
+                    {% elif order.status == 'confirmed' %}✅
+                    {% elif order.status == 'dispatched' %}🚚
+                    {% elif order.status == 'delivered' %}🎉
+                    {% else %}❌{% endif %}
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+
         </div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px;">🌾 {{ order.farmer.user.get_full_name }} · {{ order.created_at|date:"M d, Y" }}</div>
-        {% if order.farmer_note %}
-        <div style="font-size:12px;color:var(--gold);margin-top:4px;">💬 Farmer: {{ order.farmer_note }}</div>
-        {% endif %}
-      </div>
-      <div style="text-align:right;flex-shrink:0;">
-        <div style="font-family:var(--serif);font-size:20px;color:var(--gold);">₹{{ order.total_price }}</div>
-        <span class="badge {% if order.status == 'pending' %}bg-muted{% elif order.status == 'confirmed' %}bg-blue{% elif order.status == 'dispatched' %}bg-gold{% elif order.status == 'delivered' %}bg-green{% else %}bg-red{% endif %}" style="margin-top:6px;display:inline-flex;">
-          {% if order.status == 'pending' %}⏳{% elif order.status == 'confirmed' %}✅{% elif order.status == 'dispatched' %}🚚{% elif order.status == 'delivered' %}🎉{% else %}❌{% endif %}
-          {{ order.get_status_display }}
-        </span>
-      </div>
+        </a>
+        {% endfor %}
     </div>
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty">
-    <span class="empty-icon">📦</span>
-    <h3>No orders yet</h3>
-    <p>Add crops to cart and place your first order!</p>
-    <a href="/crops/" class="btn btn-gold">Browse Crops</a>
-  </div>
-  {% endif %}
+
+    {% else %}
+    <div class="empty">
+        <span class="empty-icon">📦</span>
+        <h3>No orders yet</h3>
+        <p>Add crops to cart and place your first order!</p>
+        <a href="/crops/" class="btn btn-gold">Browse Crops</a>
+    </div>
+    {% endif %}
 </div>
 
 <!-- TAB: REVIEWS -->
 <div class="tab-panel" data-group="bd" data-panel="bd" data-id="reviews">
-  {% if my_ratings %}
-  {% for r in my_ratings %}
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px">
-    <div>
-      <a href="/crop/{{ r.crop.pk }}/" style="font-weight:700;color:var(--text);font-size:14.5px;text-decoration:none">{{ r.crop.name }}</a>
-      <div style="color:var(--gold);letter-spacing:1px;margin:6px 0">{% for i in "12345" %}{% if forloop.counter <= r.stars %}★{% else %}☆{% endif %}{% endfor %}</div>
-      {% if r.review %}<p style="font-size:13.5px;color:var(--text2);line-height:1.6">{{ r.review }}</p>{% endif %}
+    {% if my_ratings %}
+    <div style="display:flex;flex-direction:column;gap:12px;">
+        {% for r in my_ratings %}
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:22px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;transition:border-color 0.2s;"
+             onmouseover="this.style.borderColor='var(--bwarm)'"
+             onmouseout="this.style.borderColor='var(--border)'">
+
+            <div style="flex:1;min-width:0;">
+                <!-- CROP NAME -->
+                <a href="/crop/{{ r.crop.pk }}/"
+                   style="font-family:var(--serif);font-size:18px;color:#fff;text-decoration:none;">
+                    {{ r.crop.name }}
+                </a>
+                <div style="font-size:12px;color:var(--text3);margin-top:3px;">
+                    🌾 {{ r.crop.farmer.user.get_full_name }}
+                </div>
+
+                <!-- STARS -->
+                <div style="color:var(--gold);letter-spacing:2px;margin:10px 0;font-size:18px;">
+                    {% for i in "12345" %}{% if forloop.counter <= r.stars %}★{% else %}☆{% endif %}{% endfor %}
+                    <span style="font-size:13px;color:var(--text3);letter-spacing:0;margin-left:6px;">{{ r.stars }}/5</span>
+                </div>
+
+                <!-- REVIEW TEXT -->
+                {% if r.review %}
+                <p style="font-size:13.5px;color:var(--text2);line-height:1.7;background:var(--surface);border-radius:8px;padding:10px 14px;">
+                    "{{ r.review }}"
+                </p>
+                {% else %}
+                <p style="font-size:13px;color:var(--text3);font-style:italic;">No written review.</p>
+                {% endif %}
+            </div>
+
+            <!-- DATE + ACTIONS -->
+            <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">
+                    {{ r.created|date:"M d, Y" }}
+                </div>
+                <a href="/crop/{{ r.crop.pk }}/" class="btn btn-ghost btn-sm">
+                    ✏️ Edit Review
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
     </div>
-    <div style="text-align:right;flex-shrink:0">
-      <div style="font-size:12px;color:var(--text3)">{{ r.created|date:"M d, Y" }}</div>
-      <a href="/crop/{{ r.crop.pk }}/" class="btn btn-ghost btn-sm" style="margin-top:8px">View Crop</a>
+
+    {% else %}
+    <div class="empty">
+        <span class="empty-icon">⭐</span>
+        <h3>No reviews yet</h3>
+        <p style="max-width:300px;margin:0 auto 20px;">
+            After receiving a crop, visit the crop page to share your experience.
+        </p>
+        <a href="/orders/" class="btn btn-gold">View My Orders</a>
     </div>
-  </div>
-  {% endfor %}
-  {% else %}
-  <div class="empty"><span class="empty-icon">⭐</span><h3>No reviews yet</h3><p>After receiving a crop, you can leave a review.</p></div>
-  {% endif %}
+    {% endif %}
 </div>
 
 {% endblock %}

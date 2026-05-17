@@ -1,7 +1,6 @@
 {% extends 'market/base.html' %}
 {% block title %}Order #{{ order.pk }} — Mud2Meal{% endblock %}
 {% block content %}
-<a href="/orders/" class="back">← Back</a>
 
 <div style="max-width:680px; margin:0 auto;">
 
@@ -93,6 +92,25 @@
         {% endif %}
     </div>
 
+    <!-- FARMER CONTACT — shown after confirmation -->
+{% if order.status != 'pending' and order.status != 'cancelled' %}
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:16px;">
+    <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:16px;">📞 Farmer Contact</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:14px;color:#fff;font-weight:600;">{{ order.farmer.user.get_full_name }}</div>
+        {% if order.farmer.phone %}
+        <div style="font-size:14px;color:var(--gold);">📱 {{ order.farmer.phone }}</div>
+        {% endif %}
+        {% if order.farmer.upi_id and order.payment == 'upi' %}
+        <div style="background:var(--gold-dim);border:1px solid var(--bwarm);border-radius:8px;padding:10px 16px;display:inline-block;margin-top:4px;">
+            <div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:4px;">UPI ID</div>
+            <div style="font-size:16px;color:var(--gold);font-weight:700;">{{ order.farmer.upi_id }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
     <!-- PAYMENT INFO -->
     <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:16px;">
         <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">💳 Payment</div>
@@ -126,21 +144,37 @@
     </div>
     {% endif %}
 
+    {% if order.farmer_note %}
+    <div style="background:rgba(240,160,32,.06); border:1px solid var(--bwarm); border-radius:var(--rl); padding:20px; margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--gold); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:10px;">
+            💬 Message from Farmer
+        </div>
+        <p style="color:var(--text2); font-size:14px; line-height:1.7;">{{ order.farmer_note }}</p>
+    </div>
+    {% endif %}
+
     <!-- FARMER ACTIONS -->
     {% if is_farmer and order.status != 'delivered' and order.status != 'cancelled' %}
     <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:16px;">
         <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">⚙️ Update Status</div>
-        <form method="post" action="/order/{{ order.pk }}/update-status/" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <form method="post" action="/order/{{ order.pk }}/update-status/">
             {% csrf_token %}
-            {% if order.status == 'pending' %}
-            <button name="status" value="confirmed" class="btn btn-green">✅ Confirm Order</button>
-            <button name="status" value="cancelled" class="btn btn-red">❌ Cancel</button>
-            {% elif order.status == 'confirmed' %}
-            <button name="status" value="dispatched" class="btn btn-gold">🚚 Mark Dispatched</button>
-            <button name="status" value="cancelled" class="btn btn-red">❌ Cancel</button>
-            {% elif order.status == 'dispatched' %}
-            <button name="status" value="delivered" class="btn btn-green">🎉 Mark Delivered</button>
-            {% endif %}
+            <div style="margin-bottom:14px;">
+                <label class="lbl">Note to Buyer (optional)</label>
+                <textarea name="farmer_note" class="fc" rows="2"
+                    placeholder="e.g. Will deliver by evening, please keep phone available…">{{ order.farmer_note }}</textarea>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                {% if order.status == 'pending' %}
+                <button name="status" value="confirmed" class="btn btn-green">✅ Confirm Order</button>
+                <button name="status" value="cancelled" class="btn btn-red">❌ Reject</button>
+                {% elif order.status == 'confirmed' %}
+                <button name="status" value="dispatched" class="btn btn-gold">🚚 Mark Dispatched</button>
+                <button name="status" value="cancelled" class="btn btn-red">❌ Cancel</button>
+                {% elif order.status == 'dispatched' %}
+                <button name="status" value="delivered" class="btn btn-green">🎉 Mark Delivered</button>
+                {% endif %}
+            </div>
         </form>
     </div>
     {% endif %}
@@ -154,4 +188,5 @@
     {% endif %}
 
 </div>
+<a href="javascript:history.back()" class="back">← Back</a>
 {% endblock %}

@@ -46,7 +46,7 @@ class Crop(models.Model):
     description = models.TextField(blank=True)
     price       = models.CharField(max_length=100)
     unit        = models.CharField(max_length=20, choices=UNIT_CHOICES, default='kg')
-    quantity    = models.CharField(max_length=100, blank=True)
+    quantity = models.PositiveIntegerField(default=0)
     location    = models.CharField(max_length=200, blank=True)
     district    = models.CharField(max_length=100, blank=True)
     state       = models.CharField(max_length=100, blank=True)
@@ -108,8 +108,11 @@ class Order(models.Model):
     status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     note         = models.TextField(blank=True)
     farmer_note  = models.TextField(blank=True)
+    buyer_seen   = models.BooleanField(default=False)  
+    farmer_seen  = models.BooleanField(default=False)
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
+    
 
     class Meta: ordering = ['-created_at']
     def __str__(self): return f"Order #{self.pk} — {self.crop.name} by {self.buyer.user.username}"

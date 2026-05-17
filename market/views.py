@@ -8,6 +8,8 @@ from django.http import JsonResponse
 from django.db.models import Avg
 from .forms import RegisterForm, LoginForm, CropForm
 from .models import Crop, Category, FarmerProfile, BuyerProfile, Rating, Order, Cart
+from django.db.models import Sum,Count
+from django.utils import timezone
 
 
 # ── HOME ─────────────────────────────────────────────
@@ -140,23 +142,32 @@ def crop_detail(request, pk):
     ratings    = crop.ratings.select_related('buyer__user').all()
     avg_rating = ratings.aggregate(avg=Avg('stars'))['avg']
     avg_rating = round(avg_rating, 1) if avg_rating else None
-    user_rating = None
-    in_cart     = False
+    user_rating         = None
+    in_cart             = False
+    has_delivered_order = False  # ✅ initialize here
 
     if request.user.is_authenticated:
         try:
-            buyer       = request.user.buyer
-            user_rating = Rating.objects.filter(crop=crop, buyer=buyer).first()
-            in_cart     = Cart.objects.filter(buyer=buyer, crop=crop).exists()
-        except: pass
+            buyer               = request.user.buyer
+            user_rating         = Rating.objects.filter(crop=crop, buyer=buyer).first()
+            has_delivered_order = Order.objects.filter(crop=crop, buyer=buyer, status='delivered').exists()
+            in_cart             = Cart.objects.filter(buyer=buyer, crop=crop).exists()
+        except Exception as e:
+            print(e)  # ✅ don't silently swallow errors during development
+
+    is_farmer = hasattr(request.user, 'farmer') and request.user.farmer == crop.farmer
+    is_buyer  = hasattr(request.user, 'buyer')
 
     return render(request, 'market/crop_detail.html', {
-        'crop'       : crop,
-        'related'    : related,
-        'ratings'    : ratings,
-        'avg_rating' : avg_rating,
-        'user_rating': user_rating,
-        'in_cart'    : in_cart,
+        'crop'               : crop,
+        'related'            : related,
+        'ratings'            : ratings,
+        'avg_rating'         : avg_rating,
+        'user_rating'        : user_rating,
+        'in_cart'            : in_cart,
+        'is_farmer'          : is_farmer,
+        'is_buyer'           : is_buyer,
+        'has_delivered_order': has_delivered_order,
     })
 
 
@@ -205,14 +216,14 @@ def farmer_dashboard(request):
                 messages.success(request, f"'{crop.name}' listed! 🌾")
             else:
                 for f, e in form.errors.items(): messages.error(request, f"{f}: {e[0]}"); break
-            return redirect('/farmer-dashboard/')
+            return redirect('/farmer-dashboard/?tab=orders')
 
         elif action == 'delete_crop':
             try:
                 c = Crop.objects.get(id=request.POST.get('crop_id'), farmer=farmer)
                 n = c.name; c.delete(); messages.success(request, f"'{n}' removed.")
             except: messages.error(request, "Crop not found.")
-            return redirect('/farmer-dashboard/')
+            return redirect('/farmer-dashboard/?tab=orders')
 
         elif action == 'update_order':
             order_id = request.POST.get('order_id')
@@ -226,7 +237,7 @@ def farmer_dashboard(request):
                 o.save()
                 messages.success(request, f"Order #{o.pk} marked as {o.get_status_display()}.")
             except: messages.error(request, "Order not found.")
-            return redirect('/farmer-dashboard/')
+            return redirect('/farmer-dashboard/?tab=orders')
 
     crops          = Crop.objects.filter(farmer=farmer).select_related('category')
     orders         = Order.objects.filter(farmer=farmer).select_related('crop', 'buyer__user').order_by('-created_at')
@@ -234,7 +245,10 @@ def farmer_dashboard(request):
     avg_rating     = all_ratings.aggregate(avg=Avg('stars'))['avg']
     avg_rating     = round(avg_rating, 1) if avg_rating else None
     recent_reviews = all_ratings.select_related('buyer__user', 'crop').order_by('-created')[:5]
-
+    total_revenue = Order.objects.filter(farmer=farmer,status='delivered').aggregate(total=Sum('total_price'))['total'] or 0
+    orders_this_month = Order.objects.filter(farmer=farmer,created_at__month=timezone.now().month,created_at__year=timezone.now().year,).count()
+    top_crop = Order.objects.filter(farmer=farmer).values('crop__name').annotate(count=Count('id')).order_by('-count').first()
+    
     return render(request, 'market/farmer_dashboard.html', {
         'farmer'         : farmer,
         'crops'          : crops,
@@ -248,23 +262,29 @@ def farmer_dashboard(request):
         'orders'         : orders,
         'order_count'    : orders.count(),
         'pending_orders' : orders.filter(status='pending').count(),
+        'total_revenue'     : total_revenue,
+        'orders_this_month' : orders_this_month,
+        'top_crop'          : top_crop,
     })
 
 
-# ── BUYER DASHBOARD ───────────────────────────────────
 @login_required
 def buyer_dashboard(request):
     try: buyer = request.user.buyer
     except: return redirect('/home/')
 
-    orders     = Order.objects.filter(buyer=buyer).select_related('crop', 'farmer__user').order_by('-created_at')
-    my_ratings = Rating.objects.filter(buyer=buyer).select_related('crop')
+    orders          = Order.objects.filter(buyer=buyer).select_related('crop', 'crop__category', 'crop__farmer__user', 'farmer__user').order_by('-created_at')
+    my_ratings      = Rating.objects.filter(buyer=buyer).select_related('crop', 'crop__farmer__user')
+    active_orders   = orders.filter(status__in=['pending', 'confirmed', 'dispatched']).count()
+    delivered_count = orders.filter(status='delivered').count()
 
     return render(request, 'market/buyer_dashboard.html', {
-        'buyer'      : buyer,
-        'orders'     : orders,
-        'order_count': orders.count(),
-        'my_ratings' : my_ratings,
+        'buyer'          : buyer,
+        'orders'         : orders,
+        'order_count'    : orders.count(),
+        'active_orders'  : active_orders,
+        'delivered_count': delivered_count,
+        'my_ratings'     : my_ratings,
     })
 
 
@@ -313,7 +333,7 @@ def edit_crop(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, f"'{crop.name}' updated! ✅")
-            return redirect('/farmer-dashboard/')
+            return redirect('/farmer-dashboard/?tab=orders')
         for f, e in form.errors.items(): messages.error(request, f"{f}: {e[0]}"); break
     else:
         form = CropForm(instance=crop)
@@ -327,19 +347,31 @@ def order_detail(request, pk):
     try:
         buyer = request.user.buyer
         order = get_object_or_404(Order, pk=pk, buyer=buyer)
+
+        # ── mark as seen by buyer ──
+        if order.status in ['confirmed', 'dispatched'] and not order.buyer_seen:
+            order.buyer_seen = True
+            order.save()
+
     except:
         try:
             farmer    = request.user.farmer
             order     = get_object_or_404(Order, pk=pk, farmer=farmer)
             is_farmer = True
+
+            # ── mark as seen by farmer ──
+            if order.status == 'pending' and not order.farmer_seen:
+                order.farmer_seen = True
+                order.save()
+
         except:
             return redirect('/home/')
 
     steps = [
-        ('pending',   'Pending',   '⏳'),
-        ('confirmed', 'Confirmed', '✅'),
-        ('dispatched','Dispatched','🚚'),
-        ('delivered', 'Delivered', '🎉'),
+        ('pending',    'Pending',    '⏳'),
+        ('confirmed',  'Confirmed',  '✅'),
+        ('dispatched', 'Dispatched', '🚚'),
+        ('delivered',  'Delivered',  '🎉'),
     ]
     status_order = ['pending', 'confirmed', 'dispatched', 'delivered']
     step_index   = status_order.index(order.status) + 1 if order.status in status_order else 0
@@ -351,36 +383,93 @@ def order_detail(request, pk):
         'step_index': step_index,
     })
 
-
 # ── UPDATE ORDER STATUS ───────────────────────────────
 @login_required
 def update_order_status(request, pk):
-    if request.method != 'POST': return redirect(f'/order/{pk}/')
-    try:
-        farmer = request.user.farmer
-        order  = get_object_or_404(Order, pk=pk, farmer=farmer)
-    except:
-        # allow buyer to cancel
-        try:
-            buyer = request.user.buyer
-            order = get_object_or_404(Order, pk=pk, buyer=buyer)
-            if request.POST.get('status') == 'cancelled' and order.status == 'pending':
-                order.status = 'cancelled'
-                order.save()
-                messages.success(request, "Order cancelled.")
-        except: pass
+    if request.method != 'POST':
         return redirect(f'/order/{pk}/')
 
-    status      = request.POST.get('status')
-    farmer_note = request.POST.get('farmer_note', '').strip()
-    if status in ['confirmed', 'dispatched', 'delivered', 'cancelled']:
-        order.status = status
-    if farmer_note:
-        order.farmer_note = farmer_note
-    order.save()
-    messages.success(request, f"Order marked as {order.get_status_display()}.")
-    return redirect(f'/order/{pk}/')
+    from django.utils import timezone
+    from datetime import timedelta
 
+    order = get_object_or_404(Order, pk=pk)
+    status      = request.POST.get('status', '').strip()
+    farmer_note = request.POST.get('farmer_note', '').strip()
+
+    # ── FARMER UPDATING ──
+    try:
+        farmer = request.user.farmer
+
+        if order.farmer != farmer:
+            messages.error(request, "Not your order.")
+            return redirect(f'/order/{pk}/')
+
+        if status == 'confirmed' and order.status == 'pending':
+            crop = order.crop
+            if order.quantity > crop.quantity:
+                messages.error(request, f"Only {crop.quantity} {crop.unit} available. Cannot confirm.")
+                return redirect(f'/order/{pk}/')
+            crop.quantity -= order.quantity
+            if crop.quantity == 0:
+                crop.status = 'sold'
+            crop.save()
+            order.status = 'confirmed'
+
+        elif status == 'dispatched' and order.status == 'confirmed':
+            order.status = 'dispatched'
+
+        elif status == 'delivered' and order.status == 'dispatched':
+            order.status = 'delivered'
+
+        elif status == 'cancelled' and order.status in ['pending', 'confirmed']:
+            # restore stock if cancelling after confirmation
+            if order.status == 'confirmed':
+                crop = order.crop
+                crop.quantity += order.quantity
+                if crop.status == 'sold':
+                    crop.status = 'available'
+                crop.save()
+            order.status = 'cancelled'
+
+        else:
+            messages.error(request, f"Cannot update from {order.get_status_display()} to {status}.")
+            return redirect(f'/order/{pk}/')
+
+        if farmer_note:
+            order.farmer_note = farmer_note
+        order.save()
+        messages.success(request, f"Order marked as {order.get_status_display()}. ✅")
+        return redirect(f'/order/{pk}/')
+
+    except AttributeError:
+        pass
+
+    # ── BUYER CANCELLING ──
+    try:
+        buyer = request.user.buyer
+
+        if order.buyer != buyer:
+            messages.error(request, "Not your order.")
+            return redirect(f'/order/{pk}/')
+
+        if status == 'cancelled':
+            if order.status != 'pending':
+                messages.error(request, "You can only cancel pending orders.")
+                return redirect(f'/order/{pk}/')
+            time_limit = order.created_at + timedelta(hours=1)
+            if timezone.now() > time_limit:
+                messages.error(request, "Cannot cancel after 1 hour of placing order.")
+                return redirect(f'/order/{pk}/')
+            order.status = 'cancelled'
+            order.save()
+            messages.success(request, "Order cancelled successfully.")
+
+        return redirect(f'/order/{pk}/')
+
+    except AttributeError:
+        pass
+
+    return redirect('/home/')
 
 # ── MY ORDERS ─────────────────────────────────────────
 @login_required
@@ -406,13 +495,21 @@ def cart_add(request, crop_pk):
     except:
         messages.error(request, "Only buyers can add to cart.")
         return redirect(f'/crop/{crop_pk}/')
+
+    # ── stock check ──
+    try:
+        if int(crop.quantity) < 1:
+            messages.error(request, f"'{crop.name}' is out of stock.")
+            return redirect(f'/crop/{crop_pk}/')
+    except:
+        pass    
+
     cart_item, created = Cart.objects.get_or_create(buyer=buyer, crop=crop)
     if created:
         messages.success(request, f"'{crop.name}' added to cart! 🛒")
     else:
         messages.info(request, f"'{crop.name}' is already in your cart.")
     return redirect(request.META.get('HTTP_REFERER', f'/crop/{crop_pk}/'))
-
 
 @login_required
 def cart_remove(request, crop_pk):
@@ -450,7 +547,9 @@ def cart_checkout(request):
     try: buyer = request.user.buyer
     except: return redirect('/home/')
 
-    items = Cart.objects.filter(buyer=buyer).select_related('crop__category', 'crop__farmer__user')
+    items = Cart.objects.filter(buyer=buyer).select_related(
+        'crop__category', 'crop__farmer__user'
+    )
     if not items.exists():
         messages.error(request, "Your cart is empty.")
         return redirect('/cart/')
@@ -466,6 +565,15 @@ def cart_checkout(request):
         if delivery == 'delivery' and not address:
             messages.error(request, "Please provide your delivery address.")
             return redirect('/cart/checkout/')
+
+        # ── quantity validation ──
+        for item in items:
+            try:
+                if item.quantity > int(item.crop.quantity):
+                    messages.error(request, f"Only {item.crop.quantity} {item.crop.unit} available for '{item.crop.name}'.")
+                    return redirect('/cart/')
+            except:
+                pass
 
         placed = []
         for item in items:

@@ -32,6 +32,8 @@
   <div class="sc"><div class="sc-num" style="color:var(--text3)">{{ sold_crops }}</div><div class="sc-lbl">Sold</div></div>
   <div class="sc"><div class="sc-num" style="color:var(--gold)">{{ pending_orders }}</div><div class="sc-lbl">Pending Orders</div></div>
   <div class="sc"><div class="sc-num" style="color:var(--gold-l)">{% if avg_farm_rating %}{{ avg_farm_rating }}★{% else %}—{% endif %}</div><div class="sc-lbl">Avg Rating</div></div>
+  <div class="sc"><div class="sc-num" style="color:var(--green-l)">₹{{ total_revenue }}</div><div class="sc-lbl">Total Revenue</div></div>
+  <div class="sc"><div class="sc-num">{{ orders_this_month }}</div><div class="sc-lbl">Orders This Month</div></div>
 </div>
 
 <!-- TABS -->
@@ -297,3 +299,10 @@
 </div>
 
 {% endblock %}
+
+<script>
+// stay on correct tab after redirect
+const urlParams = new URLSearchParams(window.location.search);
+const tab = urlParams.get('tab');
+if (tab) switchTab('dash', tab);
+</script>
