@@ -300,9 +300,11 @@
 
 {% endblock %}
 
+{% block extra_js %}
 <script>
-// stay on correct tab after redirect
-const urlParams = new URLSearchParams(window.location.search);
-const tab = urlParams.get('tab');
-if (tab) switchTab('dash', tab);
+  // Stay on correct tab after any form action
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  if (tab) switchTab('dash', tab);
 </script>
+{% endblock %}

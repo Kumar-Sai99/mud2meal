@@ -3,6 +3,19 @@
 {% block content %}
 <a href="javascript:history.back()" class="back">← Back</a>
 
+{% if not items %}
+<!-- EMPTY CART — full width centered -->
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;padding:40px;">
+    <div style="font-size:80px;margin-bottom:20px;opacity:0.6;">🛒</div>
+    <h2 style="font-family:var(--serif);font-size:32px;color:#fff;margin-bottom:12px;">Your cart is empty</h2>
+    <p style="color:var(--text3);font-size:15px;max-width:340px;margin:0 auto 28px;line-height:1.7;">
+        Browse fresh crops from farmers across India and add them to your cart.
+    </p>
+    <a href="/crops/" class="btn btn-gold btn-lg">Browse Crops →</a>
+</div>
+
+{% else %}
+<!-- CART WITH ITEMS — 2 column grid -->
 <div style="display:grid; grid-template-columns:1fr 340px; gap:28px; align-items:start;">
 
     <!-- LEFT — CART ITEMS -->
@@ -12,7 +25,6 @@
             <p style="color:var(--text3); margin-top:6px;">{{ count }} item{{ count|pluralize }} in your cart</p>
         </div>
 
-        {% if items %}
         <div style="display:flex; flex-direction:column; gap:14px;">
             {% for item in items %}
             <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:20px; display:flex; align-items:center; gap:16px;">
@@ -52,21 +64,9 @@
             </div>
             {% endfor %}
         </div>
-
-        {% else %}
-        <div style="text-align:center;padding:80px 20px;">
-            <div style="font-size:72px;margin-bottom:24px;opacity:0.6;">🛒</div>
-            <h2 style="font-family:var(--serif);font-size:28px;color:#fff;margin-bottom:12px;">Your cart is empty</h2>
-            <p style="color:var(--text3);font-size:15px;max-width:340px;margin:0 auto 28px;line-height:1.7;">
-                Browse fresh crops from farmers across India and add them to your cart.
-            </p>
-            <a href="/crops/" class="btn btn-gold btn-lg">Browse Crops →</a>
-        </div>
-        {% endif %}
     </div>
 
     <!-- RIGHT — SUMMARY -->
-    {% if items %}
     <div style="position:sticky; top:84px;">
         <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px;">
             <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:20px;">Order Summary</div>
@@ -93,7 +93,8 @@
             </a>
         </div>
     </div>
-    {% endif %}
 
 </div>
+{% endif %}
+
 {% endblock %}
