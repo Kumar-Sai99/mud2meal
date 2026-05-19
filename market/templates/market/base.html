@@ -193,17 +193,17 @@
 <body>
 
 <nav class="nav">
-  <a href="/home/" class="nav-logo">Mud<em>2</em>Meal</a>
-  <form class="nav-search" action="/crops/" method="get">
+  <a href="{% url 'home' %}" class="nav-logo">Mud<em>2</em>Meal</a>
+  <form class="nav-search" action="{% url 'crop_list' %}" method="get">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
     <input name="q" type="text" placeholder="Search crops, districts…" value="{{ request.GET.q }}">
   </form>
   <ul class="nav-links">
-    <li><a href="/home/">Home</a></li>
-    <li><a href="/crops/">Browse</a></li>
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'crop_list' %}">Browse</a></li>
     {% if user.is_authenticated %}
     <li style="position:relative;">
-        <a href="/dashboard/" class="btn btn-green btn-sm">
+        <a href="{% url 'dashboard' %}" class="btn btn-green btn-sm">
             Dashboard
             {% if notif_count %}
             <span style="position:absolute;top:-6px;right:-6px;background:#e53;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;border:2px solid var(--bg);">{{ notif_count }}</span>
@@ -222,16 +222,16 @@
                 <div class="dh-role">{% if is_farmer %}🌾 Farmer{% else %}🛒 Buyer{% endif %}</div>
                 <div class="dh-email">{{ user.email }}</div>
             </div>
-            <a href="/dashboard/"    class="di">🪟 Dashboard</a>
-            <a href="/edit-profile/" class="di">✏️ Edit Profile</a>
-            <a href="/crops/"        class="di">🌾 Browse Crops</a>
+            <a href="{% url 'dashboard' %}"    class="di">🪟 Dashboard</a>
+            <a href="{% url 'edit_profile' %}" class="di">✏️ Edit Profile</a>
+            <a href="{% url 'crop_list' %}"    class="di">🌾 Browse Crops</a>
             <a href="{% url 'logout' %}" class="di red">🚪 Logout</a>
             <div class="dsep"></div>
         </div>
     </li>
     {% else %}
-    <li><a href="/login/"  class="btn btn-outline btn-sm">Login</a></li>
-    <li><a href="/join/"   class="btn btn-gold btn-sm">Join Free</a></li>
+    <li><a href="{% url 'login' %}"  class="btn btn-outline btn-sm">Login</a></li>
+    <li><a href="{% url 'role_select' %}"   class="btn btn-gold btn-sm">Join Free</a></li>
     {% endif %}
 </ul>
 </nav>

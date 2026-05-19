@@ -26,7 +26,7 @@ urlpatterns = [
     path('cart/remove/<int:crop_pk>/',         views.cart_remove,           name='cart_remove'),
     path('cart/update/<int:crop_pk>/',         views.cart_update,           name='cart_update'),
     path('cart/checkout/',                     views.cart_checkout,         name='cart_checkout'),
-    path('order/success/', views.order_success, name='order_success'),
+    path('order/success/',                     views.order_success,         name='order_success'),
 
     # REST API
     path('api/crops/',                         api_views.api_crop_list,         name='api_crop_list'),
@@ -36,3 +36,11 @@ urlpatterns = [
     path('api/categories/',                    api_views.api_category_list,     name='api_category_list'),
     path('api/my-crops/',                      api_views.api_my_crops,          name='api_my_crops'),
 ]
+
+# Serve media and static files during development
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

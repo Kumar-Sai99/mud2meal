@@ -1,7 +1,7 @@
 {% extends 'market/base.html' %}
 {% block title %}My Cart — Mud2Meal{% endblock %}
 {% block content %}
-<a href="/crops/" class="back">← Back</a>
+<a href="javascript:history.back()" class="back">← Back</a>
 
 {% if not items %}
 <!-- EMPTY CART — full width centered -->

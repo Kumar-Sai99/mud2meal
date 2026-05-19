@@ -121,7 +121,7 @@ def crop_list(request):
     if district: crops = crops.filter(district__icontains=district)
     crops = crops.order_by(sort)
 
-    paginator = Paginator(crops, 12)
+    paginator = Paginator(crops, 6)
     crops     = paginator.get_page(request.GET.get('page', 1))
 
     categories = Category.objects.all()
