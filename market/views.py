@@ -655,3 +655,21 @@ def cart_checkout(request):
         return redirect('/orders/')
 
     return render(request, 'market/checkout.html', {'items': items, 'total': total})
+
+@login_required
+def order_success(request):
+    try: buyer = request.user.buyer
+    except: return redirect('/home/')
+
+    # get last placed orders from session
+    order_ids = request.session.pop('last_order_ids', [])
+    orders    = Order.objects.filter(pk__in=order_ids).select_related('crop', 'crop__category', 'farmer__user')
+    total     = sum(o.total_price for o in orders)
+
+    if not orders:
+        return redirect('/orders/')
+
+    return render(request, 'market/order_success.html', {
+        'orders': orders,
+        'total' : total,
+    })

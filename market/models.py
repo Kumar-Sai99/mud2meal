@@ -24,6 +24,7 @@ class FarmerProfile(models.Model):
     specialty   = models.CharField(max_length=200, blank=True)
     upi_id      = models.CharField(max_length=100, blank=True)
     is_verified = models.BooleanField(default=False)
+    upi_id = models.CharField(max_length=100, blank=True)
     def __str__(self): return f"{self.user.username} — Farmer"
 
 

@@ -1,7 +1,11 @@
 {% extends 'market/base.html' %}
 {% block title %}My Orders — Mud2Meal{% endblock %}
 {% block content %}
-<a href="javascript:history.back()" class="back">← Back</a>
+{% if is_farmer %}
+<a href="/farmer-dashboard/" class="back">← Back</a>
+{% else %}
+<a href="/home/" class="back">← Back</a>
+{% endif %}
 
 <div style="margin-bottom:32px;">
     <h1 style="font-family:var(--serif); font-size:36px; color:#fff;">

@@ -3,7 +3,7 @@
 {% block content %}
 
 <!-- HEADER -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px">
     <div>
         <div style="font-family:var(--serif);font-size:30px;color:var(--text)">
             Welcome, <span style="color:var(--gold);font-style:italic">{{ buyer.user.first_name }}</span> 🛒
@@ -12,16 +12,17 @@
             Track your orders and reviews
         </div>
     </div>
-    <div style="display:flex;gap:10px;">
-        <a href="/cart/" class="btn btn-ghost">
-            🛒 My Cart
+    <div style="display:flex;gap:10px;align-items:center;">
+        <a href="/crops/" class="btn btn-gold">Browse Crops</a>
+        <a href="/cart/" class="btn btn-ghost" style="position:relative;">
+            🛒 Cart
             {% if cart_count %}
             <span style="background:var(--gold);color:#000;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-left:4px;">{{ cart_count }}</span>
             {% endif %}
         </a>
-        <a href="/crops/" class="btn btn-gold">Browse Crops</a>
     </div>
 </div>
+
 
 <!-- STATS -->
 <div class="g-stats">
@@ -134,6 +135,8 @@
     </div>
     {% endif %}
 </div>
+
+  
 
 <!-- TAB: REVIEWS -->
 <div class="tab-panel" data-group="bd" data-panel="bd" data-id="reviews">

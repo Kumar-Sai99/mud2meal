@@ -1,0 +1,82 @@
+{% extends 'market/base.html' %}
+{% block title %}Order Placed — Mud2Meal{% endblock %}
+{% block content %}
+
+<div style="max-width:560px;margin:60px auto;text-align:center;">
+
+    <!-- SUCCESS ICON -->
+    <div style="font-size:80px;margin-bottom:24px;">🎉</div>
+
+    <h1 style="font-family:var(--serif);font-size:36px;color:#fff;margin-bottom:12px;">
+        Order Placed Successfully!
+    </h1>
+    <p style="color:var(--text3);font-size:15px;line-height:1.8;margin-bottom:32px;">
+        Your order has been sent to the farmer.<br>
+        You will be notified once the farmer confirms it.
+    </p>
+
+    <!-- ORDER SUMMARY -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:24px;text-align:left;">
+        <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:16px;">
+            📦 Orders Placed
+        </div>
+        {% for order in orders %}
+        <div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);">
+            <div style="width:44px;height:44px;background:var(--surface);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--border);flex-shrink:0;">
+                <span data-crop="{{ order.crop.name }}">{{ order.crop.category.icon|default:"🌿" }}</span>
+            </div>
+            <div style="flex:1;">
+                <div style="font-weight:700;color:#fff;font-size:15px;">{{ order.crop.name }}</div>
+                <div style="font-size:12px;color:var(--text3);margin-top:3px;">
+                    {{ order.quantity }} {{ order.crop.unit }} · 🌾 {{ order.farmer.user.get_full_name }}
+                </div>
+            </div>
+            <div style="font-family:var(--serif);font-size:18px;color:var(--gold);">
+                ₹{{ order.total_price }}
+            </div>
+        </div>
+        {% endfor %}
+        <div style="display:flex;justify-content:space-between;margin-top:14px;">
+            <span style="font-weight:700;color:#fff;">Total</span>
+            <span style="font-family:var(--serif);font-size:22px;color:var(--gold);">₹{{ total }}</span>
+        </div>
+    </div>
+
+    <!-- WHAT HAPPENS NEXT -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:32px;text-align:left;">
+        <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:16px;">
+            ⏭️ What happens next?
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:20px;">⏳</span>
+                <span style="font-size:13px;color:var(--text2);">Farmer reviews your order</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:20px;">✅</span>
+                <span style="font-size:13px;color:var(--text2);">Farmer confirms and shares contact details</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:20px;">🚚</span>
+                <span style="font-size:13px;color:var(--text2);">Crop is dispatched or ready for pickup</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:20px;">🎉</span>
+                <span style="font-size:13px;color:var(--text2);">You receive the crop and can leave a review</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="/buyer-dashboard/" class="btn btn-gold btn-lg">
+            📊 Track Orders
+        </a>
+        <a href="/crops/" class="btn btn-ghost btn-lg">
+            🌾 Browse More Crops
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}
