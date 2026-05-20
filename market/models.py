@@ -132,5 +132,9 @@ class Cart(models.Model):
 
     @property
     def subtotal(self):
-        try: return self.crop.price * self.quantity
-        except: return 0
+        try:
+            # Remove ₹, commas, spaces — keep only digits and dots
+            clean_price = ''.join(c for c in self.crop.price if c.isdigit() or c == '.')
+            return float(clean_price) * self.quantity
+        except:
+            return 0
