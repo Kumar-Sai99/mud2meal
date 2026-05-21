@@ -2,7 +2,6 @@
 {% block title %}Edit {{ crop.name }} — Mud2Meal{% endblock %}
 {% block content %}
 <div style="max-width:680px;margin:0 auto">
-  <a href="/farmer-dashboard/" class="back">← Back to Dashboard</a>
   <div style="font-family:var(--serif);font-size:30px;color:var(--text);margin-bottom:6px">Edit Crop</div>
   <div style="font-size:14px;color:var(--text3);margin-bottom:32px">Update details for <strong style="color:var(--gold)">{{ crop.name }}</strong></div>
 
@@ -50,4 +49,5 @@
     </div>
   </form>
 </div>
+  <a href="/farmer-dashboard/" class="back">← Back to Dashboard</a>
 {% endblock %}
