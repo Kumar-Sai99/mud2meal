@@ -98,10 +98,12 @@ def role_select(request):
 # ── DASHBOARD ROUTER ─────────────────────────────────
 @login_required
 def dashboard(request):
+    # FarmerProfile raises RelatedObjectDoesNotExist if user is not a farmer
     try: request.user.farmer; return redirect('/farmer-dashboard/')
-    except: pass
+    except Exception: pass
+    # BuyerProfile raises RelatedObjectDoesNotExist if user is not a buyer
     try: request.user.buyer; return redirect('/buyer-dashboard/')
-    except: pass
+    except Exception: pass
     return redirect('/home/')
 
 
@@ -146,24 +148,28 @@ def crop_detail(request, pk):
     in_cart             = False
     has_delivered_order = False
 
+    # hasattr check prevents AttributeError on AnonymousUser
     is_farmer = (
         request.user.is_authenticated and
         hasattr(request.user, 'farmer') and
-        request.user.farmer == crop.farmer
+        request.user.farmer == crop.farmer  # must be THIS crop's farmer
     )
     is_buyer = (
         request.user.is_authenticated and
         hasattr(request.user, 'buyer')
     )
 
+    # only fetch buyer-specific data if user is a buyer
+    # and not the farmer of this crop
     if is_buyer and not is_farmer:
         try:
             buyer               = request.user.buyer
             user_rating         = Rating.objects.filter(crop=crop, buyer=buyer).first()
+            # buyer can only review after receiving the crop
             has_delivered_order = Order.objects.filter(crop=crop, buyer=buyer, status='delivered').exists()
             in_cart             = Cart.objects.filter(buyer=buyer, crop=crop).exists()
         except Exception as e:
-            print(e)
+            print(f"Crop detail buyer data error: {e}")
 
     return render(request, 'market/crop_detail.html', {
         'crop'               : crop,
@@ -206,7 +212,7 @@ def submit_rating(request, crop_pk):
 @login_required
 def delete_rating(request, crop_pk):
     try: Rating.objects.filter(crop_id=crop_pk, buyer=request.user.buyer).delete()
-    except: pass
+    except Exception: pass
     messages.success(request, "Review removed.")
     return redirect(f'/crop/{crop_pk}/')
 
@@ -214,8 +220,9 @@ def delete_rating(request, crop_pk):
 # ── FARMER DASHBOARD ─────────────────────────────────
 @login_required
 def farmer_dashboard(request):
+    # redirect non-farmers away from farmer dashboard
     try: farmer = request.user.farmer
-    except: return redirect('/home/')
+    except Exception: return redirect('/home/')
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -333,8 +340,9 @@ def farmer_dashboard(request):
 # ── BUYER DASHBOARD ───────────────────────────────────
 @login_required
 def buyer_dashboard(request):
+    # redirect non-buyers away from buyer dashboard
     try: buyer = request.user.buyer
-    except: return redirect('/home/')
+    except Exception: return redirect('/home/')
 
     orders = Order.objects.filter(buyer=buyer).select_related(
         'crop', 'crop__category', 'crop__farmer__user', 'farmer__user'
@@ -373,7 +381,9 @@ def edit_profile(request):
             f.upi_id    = request.POST.get('upi_id', '')
             if request.FILES.get('photo'): f.photo = request.FILES['photo']
             f.save()
-        except: pass
+        except Exception:
+            # user is not a farmer, skip farmer profile update
+            pass
         try:
             b = user.buyer
             b.phone            = request.POST.get('phone', '')
@@ -381,7 +391,10 @@ def edit_profile(request):
             b.state            = request.POST.get('state', '')
             b.delivery_address = request.POST.get('delivery_address', '')
             b.save()
-        except: pass
+        except Exception:
+            # user is not a buyer, skip buyer profile update
+            pass
+
         messages.success(request, "Profile updated successfully! ✅")
         return redirect('/edit-profile/')
     return render(request, 'market/edit_profile.html')
@@ -391,7 +404,7 @@ def edit_profile(request):
 @login_required
 def edit_crop(request, pk):
     try: farmer = request.user.farmer
-    except: return redirect('/home/')
+    except Exception: return redirect('/home/')
     crop = get_object_or_404(Crop, pk=pk, farmer=farmer)
     if request.method == 'POST':
         form = CropForm(request.POST, request.FILES, instance=crop)
@@ -418,7 +431,7 @@ def order_detail(request, pk):
         if order.status in ['confirmed', 'dispatched'] and not order.buyer_seen:
             order.buyer_seen = True
             order.save()
-    except:
+    except Exception:
         try:
             farmer    = request.user.farmer
             order     = get_object_or_404(Order, pk=pk, farmer=farmer)
@@ -426,7 +439,7 @@ def order_detail(request, pk):
             if order.status == 'pending' and not order.farmer_seen:
                 order.farmer_seen = True
                 order.save()
-        except:
+        except Exception:
             return redirect('/home/')
 
     steps = [
@@ -446,7 +459,7 @@ def order_detail(request, pk):
     })
 
 
-# ── UPDATE ORDER STATUS ───────────────────────────────
+# ── UPDATE ORDER STATUS ──────────────────────────────
 @login_required
 def update_order_status(request, pk):
     if request.method != 'POST':
@@ -456,13 +469,18 @@ def update_order_status(request, pk):
     status      = request.POST.get('status', '').strip()
     farmer_note = request.POST.get('farmer_note', '').strip()
 
-    # ── FARMER ──
+    # ── FARMER BLOCK ──
+    # AttributeError raised if user has no farmer profile
+    # meaning user is a buyer — fall through to buyer block
     try:
         farmer = request.user.farmer
+
+        # security check — farmer can only update their own orders
         if order.farmer != farmer:
             messages.error(request, "Not your order.")
             return redirect(f'/order/{pk}/')
 
+        # stock deducted ONLY on confirm — not at cart or checkout
         if status == 'confirmed' and order.status == 'pending':
             crop = order.crop
             if order.quantity > crop.quantity:
@@ -475,12 +493,14 @@ def update_order_status(request, pk):
             order.status = 'confirmed'
             order.farmer_seen = True
 
+        # strict status progression — cannot skip steps
         elif status == 'dispatched' and order.status == 'confirmed':
             order.status = 'dispatched'
 
         elif status == 'delivered' and order.status == 'dispatched':
             order.status = 'delivered'
 
+        # stock restored if farmer cancels a confirmed order
         elif status == 'cancelled' and order.status in ['pending', 'confirmed']:
             if order.status == 'confirmed':
                 crop = order.crop
@@ -501,11 +521,15 @@ def update_order_status(request, pk):
         return redirect(f'/order/{pk}/')
 
     except AttributeError:
+        # user has no farmer profile, check if buyer
         pass
 
-    # ── BUYER ──
+    # ── BUYER BLOCK ──
+    # buyer can only cancel pending orders within 1 hour
     try:
         buyer = request.user.buyer
+
+        # security check — buyer can only cancel their own orders
         if order.buyer != buyer:
             messages.error(request, "Not your order.")
             return redirect(f'/order/{pk}/')
@@ -514,6 +538,7 @@ def update_order_status(request, pk):
             if order.status != 'pending':
                 messages.error(request, "You can only cancel pending orders.")
                 return redirect(f'/order/{pk}/')
+            # 1 hour cancellation window
             time_limit = order.created_at + timedelta(hours=1)
             if timezone.now() > time_limit:
                 messages.error(request, "Cannot cancel after 1 hour of placing order.")
@@ -536,12 +561,12 @@ def my_orders(request):
         buyer  = request.user.buyer
         orders = Order.objects.filter(buyer=buyer).select_related('crop', 'farmer__user')
         return render(request, 'market/my_orders.html', {'orders': orders})
-    except: pass
+    except Exception: pass
     try:
         farmer = request.user.farmer
         orders = Order.objects.filter(farmer=farmer).select_related('crop', 'buyer__user')
         return render(request, 'market/my_orders.html', {'orders': orders, 'is_farmer': True})
-    except: pass
+    except Exception: pass
     return redirect('/home/')
 
 
@@ -550,7 +575,7 @@ def my_orders(request):
 def cart_add(request, crop_pk):
     crop = get_object_or_404(Crop, pk=crop_pk, status='available')
     try: buyer = request.user.buyer
-    except:
+    except Exception:
         messages.error(request, "Only buyers can add to cart.")
         return redirect(f'/crop/{crop_pk}/')
 
@@ -574,7 +599,8 @@ def cart_remove(request, crop_pk):
         Cart.objects.filter(buyer=buyer, crop_id=crop_pk).delete()
         messages.success(request, "Removed from cart.")
     except Exception as e:
-        print(e)
+        messages.error(request, "Could not remove item from cart.")
+        print(f"Cart remove error: {e}")
     return redirect('/cart/')
 
 
@@ -587,7 +613,8 @@ def cart_update(request, crop_pk):
             qty   = int(request.POST.get('quantity', 1))
             if qty < 1: qty = 1
             Cart.objects.filter(buyer=buyer, crop_id=crop_pk).update(quantity=qty)
-        except: pass
+        except Exception as e:
+            print(f"Cart update error: {e}")
     return redirect('/cart/')
 
 
@@ -595,7 +622,7 @@ def cart_update(request, crop_pk):
 @login_required
 def cart_view(request):
     try: buyer = request.user.buyer
-    except: return redirect('/home/')
+    except Exception: return redirect('/home/')
     items = Cart.objects.filter(buyer=buyer).select_related('crop__category', 'crop__farmer__user')
     total = sum(item.subtotal for item in items)
     return render(request, 'market/cart.html', {
@@ -635,8 +662,7 @@ def cart_checkout(request):
         # create orders — stock deducted only when farmer confirms
         placed = []
         for item in items:
-            try: price = float(item.crop.price)
-            except: price = 0
+            price = item.crop.price
             order = Order.objects.create(
                 crop        = item.crop,
                 buyer       = buyer,
@@ -651,23 +677,29 @@ def cart_checkout(request):
             placed.append(order)
 
         items.delete()
-        messages.success(request, f"{len(placed)} order(s) placed successfully! 🎉")
-        return redirect('/orders/')
+        # store order IDs in session to show on success page
+        request.session['last_order_ids'] = [o.pk for o in placed]
+        return redirect('/order/success/')
 
     return render(request, 'market/checkout.html', {'items': items, 'total': total})
 
+# ── ORDER SUCCESS ─────────────────────────────────────
 @login_required
 def order_success(request):
     try: buyer = request.user.buyer
-    except: return redirect('/home/')
+    except Exception: return redirect('/home/')
 
-    # get last placed orders from session
+    # retrieve order IDs stored in session during checkout
+    # session.pop removes them after reading — prevents refresh issues
     order_ids = request.session.pop('last_order_ids', [])
-    orders    = Order.objects.filter(pk__in=order_ids).select_related('crop', 'crop__category', 'farmer__user')
-    total     = sum(o.total_price for o in orders)
+    orders    = Order.objects.filter(
+        pk__in=order_ids
+    ).select_related('crop', 'crop__category', 'farmer__user')
 
-    if not orders:
+    if not orders.exists():
         return redirect('/orders/')
+
+    total = sum(o.total_price for o in orders)
 
     return render(request, 'market/order_success.html', {
         'orders': orders,

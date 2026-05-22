@@ -44,7 +44,7 @@ class Crop(models.Model):
     category    = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='crops')
     name        = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    price       = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10,decimal_places=2,help_text="Price per unit in Indian Rupees")   
     unit        = models.CharField(max_length=20, choices=UNIT_CHOICES, default='kg')
     quantity = models.PositiveIntegerField(default=0)
     location    = models.CharField(max_length=200, blank=True)
@@ -132,9 +132,5 @@ class Cart(models.Model):
 
     @property
     def subtotal(self):
-        try:
-            # Remove ₹, commas, spaces — keep only digits and dots
-            clean_price = ''.join(c for c in self.crop.price if c.isdigit() or c == '.')
-            return float(clean_price) * self.quantity
-        except:
-            return 0
+        # price is DecimalField so multiplication is safe
+        return self.crop.price * self.quantity

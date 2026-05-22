@@ -41,6 +41,7 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput)
 
 
+# REPLACE entire CropForm
 class CropForm(forms.ModelForm):
     class Meta:
         model  = Crop
@@ -49,19 +50,32 @@ class CropForm(forms.ModelForm):
             'quantity', 'description', 'district',
             'state', 'status', 'is_featured', 'photo'
         ]
+        widgets = {
+            'name'       : forms.TextInput(attrs={'placeholder': 'e.g. Sweet Tomatoes'}),
+            'price'      : forms.NumberInput(attrs={'placeholder': 'e.g. 40', 'min': '0'}),
+            'quantity'   : forms.NumberInput(attrs={'placeholder': 'e.g. 200', 'min': '0'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describe the crop quality...'}),
+            'district'   : forms.TextInput(attrs={'placeholder': 'e.g. Warangal'}),
+            'state'      : forms.TextInput(attrs={'placeholder': 'e.g. Telangana'}),
+        }
 
     def clean_price(self):
         price = self.cleaned_data.get('price')
-        if not price:
-            raise forms.ValidationError('Price is required!')
+        if price is None or price <= 0:
+            raise forms.ValidationError('Price must be greater than 0.')
         return price
 
     def clean_name(self):
-        name = self.cleaned_data.get('name')
+        name = self.cleaned_data.get('name', '').strip()
         if not name:
-            raise forms.ValidationError('Crop name is required!')
+            raise forms.ValidationError('Crop name is required.')
         return name
 
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get('quantity')
+        if quantity is None or quantity < 0:
+            raise forms.ValidationError('Quantity cannot be negative.')
+        return quantity
 
 class FarmerProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=50)
