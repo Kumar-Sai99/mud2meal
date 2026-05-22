@@ -34,9 +34,14 @@
         <div class="sc-num" style="color:var(--gold)">{{ active_orders }}</div>
         <div class="sc-lbl">Active Orders</div>
     </div>
-    <div class="sc">
+    <div class="sc" style="{% if unreviewed_deliveries %}border-color:rgba(240,160,32,.4);background:rgba(240,160,32,.04);{% endif %}">
         <div class="sc-num" style="color:var(--green-l)">{{ delivered_count }}</div>
         <div class="sc-lbl">Delivered</div>
+        {% if unreviewed_deliveries %}
+        <div style="font-size:11px;color:var(--gold);margin-top:6px;font-weight:700;">
+            ⭐ {{ unreviewed_deliveries }} awaiting review
+        </div>
+        {% endif %}
     </div>
     <div class="sc">
         <div class="sc-num" style="color:var(--text2)">{{ my_ratings.count }}</div>

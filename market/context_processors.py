@@ -1,4 +1,5 @@
 from .models import Cart, Order
+from .models import Rating
 
 def user_role(request):
     is_farmer   = False
@@ -27,10 +28,19 @@ def user_role(request):
             ).count()
             # buyer notification = orders that changed status recently
             # (confirmed or dispatched — farmer acted on them)
+            buyer = request.user.buyer
+
+            # crop IDs that this buyer has already rated
+            already_rated = Rating.objects.filter(
+                buyer=buyer
+            ).values_list('crop_id', flat=True)
+
+            # delivered orders where crop is NOT yet rated
             notif_count = Order.objects.filter(
-                buyer=request.user.buyer,
-                status__in=['confirmed', 'dispatched'],
-                buyer_seen=False
+                buyer=buyer,
+                status='delivered'
+            ).exclude(
+                crop_id__in=already_rated
             ).count()
         except:
             pass

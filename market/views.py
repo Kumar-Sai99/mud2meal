@@ -9,7 +9,6 @@ from django.utils import timezone
 from datetime import timedelta
 from .forms import RegisterForm, LoginForm, CropForm
 from .models import Crop, Category, FarmerProfile, BuyerProfile, Rating, Order, Cart
-from decimal import Decimal
 
 # ── HOME ─────────────────────────────────────────────
 def home(request):
@@ -350,15 +349,22 @@ def buyer_dashboard(request):
     my_ratings      = Rating.objects.filter(buyer=buyer).select_related('crop', 'crop__farmer__user')
     active_orders   = orders.filter(status__in=['pending', 'confirmed', 'dispatched']).count()
     delivered_count = orders.filter(status='delivered').count()
+    already_rated         = Rating.objects.filter(buyer=buyer).values_list('crop_id', flat=True)
+    unreviewed_deliveries = orders.filter(
+        status='delivered'
+    ).exclude(
+        crop_id__in=already_rated
+    ).count()
 
     return render(request, 'market/buyer_dashboard.html', {
-        'buyer'          : buyer,
-        'orders'         : orders,
-        'order_count'    : orders.count(),
-        'active_orders'  : active_orders,
-        'delivered_count': delivered_count,
-        'my_ratings'     : my_ratings,
-    })
+        'buyer'                : buyer,
+        'orders'               : orders,
+        'order_count'          : orders.count(),
+        'active_orders'        : active_orders,
+        'delivered_count'      : delivered_count,
+        'my_ratings'           : my_ratings,
+        'unreviewed_deliveries': unreviewed_deliveries,
+        })
 
 
 # ── EDIT PROFILE ─────────────────────────────────────

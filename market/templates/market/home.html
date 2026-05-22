@@ -55,7 +55,13 @@
     <p>Buy directly from verified farmers across India. Fresh produce, fair prices, zero middlemen. {{ total_crops }}+ crops available right now.</p>
     <div class="hbtns">
       <a href="/crops/" class="btn btn-gold btn-lg">Browse Crops</a>
-      <a href="/join/"  class="btn btn-outline btn-lg">Sell as Farmer</a>
+      {% if not request.user.is_authenticated %}
+        <a href="/join/" class="btn btn-outline btn-lg">Sell as Farmer</a>
+      {% elif is_farmer %}
+        <a href="/farmer-dashboard/" class="btn btn-outline btn-lg">📊 My Dashboard</a>
+      {% elif is_buyer %}
+        <a href="/buyer-dashboard/" class="btn btn-outline btn-lg">📦 My Dashboard</a>
+      {% endif %}
     </div>
     <div class="hstats">
       <div><div class="hs-num">{{ total_crops }}+</div><div class="hs-lbl">Crops listed</div></div>
@@ -243,15 +249,21 @@
 </section>
 
 <!-- ── CTA ── -->
+{% if not request.user.is_authenticated or is_farmer %}
 <div class="cta">
   <div>
     <h2>Are you a farmer?</h2>
     <p>Join thousands of farmers selling directly to buyers — no commission, no middleman, full control over your prices.</p>
   </div>
   <div style="flex-shrink:0">
-    <a href="/join/" class="btn btn-green btn-lg">Start Selling Free →</a>
+    {% if is_farmer %}
+      <a href="/farmer-dashboard/" class="btn btn-green btn-lg">Go to Dashboard →</a>
+    {% else %}
+      <a href="/join/" class="btn btn-green btn-lg">Start Selling Free →</a>
+    {% endif %}
   </div>
 </div>
+{% endif %}
 
 <script>
 function doSearch() {
