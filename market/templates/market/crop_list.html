@@ -10,23 +10,19 @@
 .filter-tag { display:inline-flex; align-items:center; gap:6px; padding:6px 13px; border-radius:50px; background:var(--surface); border:1px solid var(--border); color:var(--text2); font-size:12.5px; font-weight:600; cursor:pointer; text-decoration:none; transition:all var(--t) var(--ease); margin:3px }
 .filter-tag:hover, .filter-tag.sel { background:var(--gold-dim); border-color:var(--bwarm); color:var(--gold) }
 .results-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:12px }
-/* ✅ bright, readable results header */
 .results-hd h2 { font-family:var(--serif); font-size:24px; color:var(--text) }
 .results-count { font-size:13.5px; color:var(--text2); margin-top:3px; font-weight:600 }
 .sort-row select { background:var(--surface); border:1px solid var(--border); border-radius:50px; padding:8px 32px 8px 16px; color:var(--text2); font-family:var(--sans); font-size:13px; font-weight:600; outline:none; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238a7a6a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center }
-.search-bar { background:var(--surface); border:1px solid var(--border); border-radius:var(--rl); padding:16px 22px; margin-bottom:24px; display:flex; gap:12px; align-items:center }
-.search-bar input { flex:1; background:none; border:none; outline:none; color:var(--text); font-family:var(--sans); font-size:15px }
-.search-bar input::placeholder { color:var(--text3) }
 .pager { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:40px }
 .pager a, .pager span { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:var(--card); border:1px solid var(--border); color:var(--text2); text-decoration:none; font-size:13.5px; font-weight:700; transition:all var(--t) }
 .pager a:hover { border-color:var(--gold); color:var(--gold) }
 .pager span.cur { background:var(--gold); border-color:var(--gold); color:#000 }
-/* ✅ bigger placeholder emoji for list page */
 .crop-placeholder { font-size:68px; line-height:1; filter:drop-shadow(0 4px 10px rgba(0,0,0,.4)); transition:transform .3s }
 .cc:hover .crop-placeholder { transform:scale(1.1) }
 @media(max-width:900px){ .page-layout { grid-template-columns:1fr } .sidebar { position:static } }
 </style>
 {% endblock %}
+
 {% block content %}
 
 <form method="get" id="filterForm">
@@ -44,7 +40,8 @@
     <div class="sb-section">
       <div class="sb-lbl">Category</div>
       <div>
-        <a href="/crops/?{% if query %}q={{ query }}&{% endif %}{% if district %}district={{ district }}{% endif %}" class="filter-tag {% if not category %}sel{% endif %}">All</a>
+        <a href="/crops/?{% if query %}q={{ query }}&{% endif %}{% if district %}district={{ district }}{% endif %}"
+           class="filter-tag {% if not category %}sel{% endif %}">All</a>
         {% for cat in categories %}
         <a href="/crops/?{% if query %}q={{ query }}&{% endif %}category={{ cat.id }}{% if district %}&district={{ district }}{% endif %}"
            class="filter-tag {% if category == cat.id|stringformat:'s' %}sel{% endif %}">
@@ -72,24 +69,16 @@
 
   <!-- MAIN CONTENT -->
   <div>
-    
-    {% if request.META.HTTP_REFERER and '/home/' in request.META.HTTP_REFERER %}
-    <a href="/home/" class="back">← Back to Home</a>
-    {% elif district or query or category %}
-    <a href="/crops/" class="back">← Clear Filters</a>
-    {% endif %}
-
-    <!-- SEARCH BAR -->
-    <div class="search-bar">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input name="q" type="text" placeholder="Search crops by name…" value="{{ query }}">
-      <button type="submit" class="btn btn-gold btn-sm">Search</button>
-    </div>
 
     <!-- RESULTS HEADER -->
     <div class="results-hd">
       <div>
-        <h2>{% if query %}Results for "{{ query }}"{% elif category %}Category Crops{% else %}All Crops{% endif %}</h2>
+        <h2>
+          {% if query %}Results for "{{ query }}"
+          {% elif category %}Category Crops
+          {% else %}All Crops
+          {% endif %}
+        </h2>
         <div class="results-count">{{ crops.paginator.count }} crop{{ crops.paginator.count|pluralize }} found</div>
       </div>
       <div class="sort-row" style="display:flex;align-items:center;gap:10px">
@@ -111,14 +100,12 @@
           {% if crop.photo %}
             <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
           {% else %}
-            {# ✅ smart emoji by crop name — JS replaces 🌿 on load #}
             <span class="crop-placeholder" data-crop="{{ crop.name }}">🌿</span>
           {% endif %}
           {% if crop.is_featured %}<span class="cc-feat">Featured</span>{% endif %}
         </div>
         <div class="cc-body">
           <div class="cc-cat">{{ crop.category.icon }} {{ crop.category.name }}</div>
-          {# ✅ white crop name — clearly readable #}
           <div class="cc-name">{{ crop.name }}</div>
           <div class="cc-loc">📍 {{ crop.district }}, {{ crop.state }}</div>
           <div class="cc-foot">
@@ -140,9 +127,10 @@
       <a href="?q={{ query }}&category={{ category }}&district={{ district }}&sort={{ sort }}&page={{ crops.previous_page_number }}">←</a>
       {% endif %}
       {% for n in crops.paginator.page_range %}
-        {% if n == crops.number %}<span class="cur">{{ n }}</span>
+        {% if n == crops.number %}
+          <span class="cur">{{ n }}</span>
         {% elif n >= crops.number|add:"-2" and n <= crops.number|add:"2" %}
-        <a href="?q={{ query }}&category={{ category }}&district={{ district }}&sort={{ sort }}&page={{ n }}">{{ n }}</a>
+          <a href="?q={{ query }}&category={{ category }}&district={{ district }}&sort={{ sort }}&page={{ n }}">{{ n }}</a>
         {% endif %}
       {% endfor %}
       {% if crops.has_next %}
@@ -155,12 +143,13 @@
     <div class="empty">
       <span class="empty-icon">🔍</span>
       <h3>No crops found</h3>
-      <p>Try different filters or a broader search term.</p>
+      <p>Try different filters or search from the top bar.</p>
       <a href="/crops/" class="btn btn-ghost">Clear filters</a>
     </div>
     {% endif %}
-  </div>
 
+  </div>
 </div>
 </form>
+
 {% endblock %}

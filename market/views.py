@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .forms import RegisterForm, LoginForm, CropForm
 from .models import Crop, Category, FarmerProfile, BuyerProfile, Rating, Order, Cart
-
+from decimal import Decimal
 
 # ── HOME ─────────────────────────────────────────────
 def home(request):
