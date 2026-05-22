@@ -27,8 +27,8 @@
 
         <div style="display:flex; flex-direction:column; gap:14px;">
             {% for item in items %}
-            <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:20px; display:flex; align-items:center; gap:16px;">
-
+        <div data-item data-price="{{ item.crop.price }}" data-name="{{ item.crop.name }}"
+            style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:20px; display:flex; align-items:center; gap:16px;">
                 <!-- EMOJI -->
                 <div style="width:56px; height:56px; background:var(--surface); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:28px; border:1px solid var(--border); flex-shrink:0;">
                     <span data-crop="{{ item.crop.name }}">{{ item.crop.category.icon|default:"🌿" }}</span>
@@ -55,8 +55,7 @@
 
                 <!-- SUBTOTAL -->
                 <div style="text-align:right; flex-shrink:0; min-width:80px;">
-                    <div style="font-family:var(--serif); font-size:20px; color:var(--gold);">₹{{ item.subtotal|floatformat:0 }}</div>
-                </div>
+                    <div data-subtotal style="font-family:var(--serif); font-size:20px; color:var(--gold);">₹{{ item.subtotal|floatformat:0 }}</div>                </div>
 
                 <!-- REMOVE -->
                 <a href="/cart/remove/{{ item.crop.pk }}/"
@@ -72,9 +71,9 @@
             <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:20px;">Order Summary</div>
 
             {% for item in items %}
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13.5px;">
-                <span style="color:var(--text2);">{{ item.crop.name }} × {{ item.quantity }}</span>
-                <span style="color:#fff;">₹{{ item.subtotal|floatformat:0 }}</span>
+            <div data-summary="{{ item.crop.name }}" style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13.5px;">
+                <span data-sum-qty style="color:var(--text2);">{{ item.crop.name }} × {{ item.quantity }}</span>
+                <span data-sum-price style="color:#fff;">₹{{ item.subtotal|floatformat:0 }}</span>
             </div>
             {% endfor %}
 
@@ -82,8 +81,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
                 <span style="font-weight:700; color:#fff;">Total</span>
-                <span style="font-family:var(--serif); font-size:28px; color:var(--gold);">₹{{ total|floatformat:0 }}</span>
-            </div>
+                <span id="cart-total" style="font-family:var(--serif); font-size:28px; color:var(--gold);">₹{{ total|floatformat:0 }}</span>            </div>
 
             <a href="/cart/checkout/" class="btn btn-gold btn-lg" style="width:100%; justify-content:center;">
                 Proceed to Checkout →
