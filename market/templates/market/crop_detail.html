@@ -195,7 +195,7 @@
                 <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:14px">
                     {% if user_rating %}Update your review{% else %}Leave a review{% endif %}
                 </div>
-                <form method="post" action="/crop/{{ crop.pk }}/rate/">
+                <form method="post" action="{% url 'submit_rating' crop.pk %}">
                     {% csrf_token %}
                     <div class="star-picker" id="starPicker">
                         {% for i in "12345" %}
@@ -214,7 +214,7 @@
                             {% if user_rating %}Update{% else %}Submit review{% endif %}
                         </button>
                         {% if user_rating %}
-                        <a href="/crop/{{ crop.pk }}/rate/delete/" class="btn btn-red btn-sm">Remove</a>
+                        <a href="{% url 'delete_rating' crop.pk %}" class="btn btn-red btn-sm">Remove</a>
                         {% endif %}
                     </div>
                 </form>
@@ -229,7 +229,7 @@
             <div class="sh"><h2>More like this</h2></div>
             <div class="related-grid">
                 {% for r in related %}
-                <a href="/crop/{{ r.pk }}/" class="cc">
+                <a href="{% url 'crop_detail' r.pk %}" class="cc">
                     <div class="cc-img">
                         {% if r.photo %}
                         <img src="{{ r.photo.url }}" alt="{{ r.name }}">
@@ -271,10 +271,10 @@
                     <div style="font-size:32px;margin-bottom:10px;">🌾</div>
                     <div style="font-weight:700;color:#fff;margin-bottom:6px;">This is your crop</div>
                     <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">Manage it from your dashboard</div>
-                    <a href="/crop/{{ crop.pk }}/edit/" class="btn btn-ghost" style="width:100%;justify-content:center;">
+                    <a href="{% url 'edit_crop' crop.pk %}" class="btn btn-ghost" style="width:100%;justify-content:center;">
                         ✏️ Edit Crop
                     </a>
-                    <a href="/farmer-dashboard/" class="btn btn-gold" style="width:100%;justify-content:center;margin-top:8px;">
+                    <a href="{% url 'farmer_dashboard' %}" class="btn btn-gold" style="width:100%;justify-content:center;margin-top:8px;">
                         📊 Go to Dashboard
                     </a>
                 </div>
@@ -284,10 +284,10 @@
                 <div style="display:flex;flex-direction:column;gap:10px;">
                     {% if crop.status == 'available' %}
                         {% if in_cart %}
-                            <a href="/cart/" class="btn btn-gold" style="justify-content:center;">🛒 View Cart</a>
-                            <a href="/cart/add/{{ crop.pk }}/" class="btn btn-ghost" style="justify-content:center;">+ Add Again</a>
+                            <a href="{% url 'cart' %}" class="btn btn-gold" style="justify-content:center;">🛒 View Cart</a>
+                            <a href="{% url 'cart_add' crop.pk %}" class="btn btn-ghost" style="justify-content:center;">+ Add Again</a>
                             {% else %}
-                            <a href="/cart/add/{{ crop.pk }}/" class="btn btn-gold" style="justify-content:center;">🛒 Add to Cart</a>
+                            <a href="{% url 'cart_add' crop.pk %}" class="btn btn-gold" style="justify-content:center;">🛒 Add to Cart</a>
                             {% endif %}
                     {% else %}
                     <div class="badge bg-muted" style="text-align:center;padding:12px;justify-content:center;">
@@ -313,7 +313,7 @@
                     Login to add this crop to your cart
                 </div>
             </div>
-            <a href="/login/" class="btn btn-gold" style="width:100%;justify-content:center;">
+            <a href="{% url 'login' %}" class="btn btn-gold" style="width:100%;justify-content:center;">
                 Login to Continue
             </a>
             {% endif %}

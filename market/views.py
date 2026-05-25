@@ -381,10 +381,6 @@ def edit_profile(request):
             f.phone     = request.POST.get('phone', '')
             f.district  = request.POST.get('district', '')
             f.state     = request.POST.get('state', '')
-            f.farm_id   = request.POST.get('farm_id', '')
-            f.specialty = request.POST.get('specialty', '')
-            f.bio       = request.POST.get('bio', '')
-            f.upi_id    = request.POST.get('upi_id', '')
             if request.FILES.get('photo'): f.photo = request.FILES['photo']
             f.save()
         except Exception:

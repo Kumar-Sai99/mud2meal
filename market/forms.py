@@ -41,7 +41,6 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput)
 
 
-# REPLACE entire CropForm
 class CropForm(forms.ModelForm):
     class Meta:
         model  = Crop
@@ -77,6 +76,7 @@ class CropForm(forms.ModelForm):
             raise forms.ValidationError('Quantity cannot be negative.')
         return quantity
 
+
 class FarmerProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=50)
     last_name  = forms.CharField(max_length=50)
@@ -84,7 +84,7 @@ class FarmerProfileForm(forms.ModelForm):
 
     class Meta:
         model  = FarmerProfile
-        fields = ['phone', 'district', 'state', 'farm_id', 'specialty', 'bio', 'photo', 'upi_id']
+        fields = ['phone', 'district', 'state', 'bio', 'photo']
 
 
 class BuyerProfileForm(forms.ModelForm):

@@ -20,9 +20,6 @@ class FarmerProfile(models.Model):
     state       = models.CharField(max_length=100, blank=True)
     photo       = models.ImageField(upload_to='farmers/', blank=True, null=True)
     bio         = models.TextField(blank=True)
-    farm_id     = models.CharField(max_length=100, blank=True)
-    specialty   = models.CharField(max_length=200, blank=True)
-    upi_id      = models.CharField(max_length=100, blank=True)
     is_verified = models.BooleanField(default=False)
     def __str__(self): return f"{self.user.username} — Farmer"
 

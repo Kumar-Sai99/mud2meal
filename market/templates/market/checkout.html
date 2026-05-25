@@ -1,7 +1,7 @@
 {% extends 'market/base.html' %}
 {% block title %}Checkout — Mud2Meal{% endblock %}
 {% block content %}
-<a href="/cart/" class="back">← Back to Cart</a>
+<a href="{% url 'cart' %}" class="back">← Back to Cart</a>
 
 <div style="max-width:640px; margin:0 auto;">
 
@@ -146,7 +146,7 @@
         </button>
 
         <div style="text-align:center; margin-top:12px;">
-            <a href="/cart/" style="font-size:13px; color:var(--text3); text-decoration:none;">← Go back to cart</a>
+            <a href="{% url 'cart' %}" style="font-size:13px; color:var(--text3); text-decoration:none;">← Go back to cart</a>
         </div>
 
     </form>

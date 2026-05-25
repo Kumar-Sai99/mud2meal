@@ -157,7 +157,7 @@
     {% if is_farmer and order.status != 'delivered' and order.status != 'cancelled' %}
     <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; margin-bottom:16px;">
         <div style="font-size:13px; color:var(--text3); text-transform:uppercase; letter-spacing:.7px; font-weight:700; margin-bottom:16px;">⚙️ Update Status</div>
-        <form method="post" action="/order/{{ order.pk }}/update-status/">
+        <form method="post" action="{% url 'update_order_status' order.pk %}">
             {% csrf_token %}
             <div style="margin-bottom:14px;">
                 <label class="lbl">Note to Buyer (optional)</label>
@@ -181,12 +181,12 @@
 
     <!-- BUYER CANCEL -->
     {% if not is_farmer and order.status == 'pending' %}
-    <form method="post" action="/order/{{ order.pk }}/update-status/">
+    <form method="post" action="{% url 'update_order_status' order.pk %}">
         {% csrf_token %}
         <button name="status" value="cancelled" class="btn btn-red" style="width:100%; justify-content:center;">❌ Cancel Order</button>
     </form>
     {% endif %}
 
 </div>
-<a href="/orders/" class="back">← Back</a>
+<a href="{% url 'my_orders' %}" class="back">← Back</a>
 {% endblock %}

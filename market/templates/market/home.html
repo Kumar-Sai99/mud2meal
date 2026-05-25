@@ -54,13 +54,13 @@
     <h1>Where <em>Soil</em> Meets<br>the Table</h1>
     <p>Buy directly from verified farmers across India. Fresh produce, fair prices, zero middlemen. {{ total_crops }}+ crops available right now.</p>
     <div class="hbtns">
-      <a href="/crops/" class="btn btn-gold btn-lg">Browse Crops</a>
+      <a href="{% url 'crop_list' %}" class="btn btn-gold btn-lg">Browse Crops</a>
       {% if not request.user.is_authenticated %}
-        <a href="/join/" class="btn btn-outline btn-lg">Sell as Farmer</a>
+        <a href="{% url 'role_select' %}" class="btn btn-outline btn-lg">Sell as Farmer</a>
       {% elif is_farmer %}
-        <a href="/farmer-dashboard/" class="btn btn-outline btn-lg">📊 My Dashboard</a>
+        <a href="{% url 'farmer_dashboard' %}" class="btn btn-outline btn-lg">📊 My Dashboard</a>
       {% elif is_buyer %}
-        <a href="/buyer-dashboard/" class="btn btn-outline btn-lg">📦 My Dashboard</a>
+        <a href="{% url 'buyer_dashboard' %}" class="btn btn-outline btn-lg">📦 My Dashboard</a>
       {% endif %}
     </div>
     <div class="hstats">
@@ -115,11 +115,11 @@
 <!-- ── CATEGORIES ── -->
 {% if categories %}
 <section style="margin-bottom:52px">
-  <div class="sh"><h2>Browse by Category</h2><a href="/crops/">All crops →</a></div>
+  <div class="sh"><h2>Browse by Category</h2><a href="{% url 'crop_list' %}">All crops →</a></div>
   <div class="cat-row">
-    <a href="/crops/" class="cpill"><span class="cpill-icon">🌿</span> All Crops</a>
+    <a href="{% url 'crop_list' %}" class="cpill"><span class="cpill-icon">🌿</span> All Crops</a>
     {% for cat in categories %}
-    <a href="/crops/?category={{ cat.id }}" class="cpill">
+    <a href="{% url 'crop_list' %}?category={{ cat.id }}" class="cpill">
       <span class="cpill-icon">{{ cat.icon }}</span> {{ cat.name }}
     </a>
     {% endfor %}
@@ -130,10 +130,10 @@
 <!-- ── FEATURED CROPS ── -->
 {% if featured_crops %}
 <section style="margin-bottom:52px">
-  <div class="sh"><h2>⭐ Featured Crops</h2><a href="/crops/">View all →</a></div>
+  <div class="sh"><h2>⭐ Featured Crops</h2><a href="{% url 'crop_list' %}" >View all →</a></div>
   <div class="g4">
     {% for crop in featured_crops %}
-    <a href="/crop/{{ crop.pk }}/" class="cc">
+    <a href="{% url 'crop_detail' crop.pk %}" class="cc">
       <div class="cc-img">
         {% if crop.photo %}
           <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
@@ -162,11 +162,11 @@
 
 <!-- ── FRESH LISTINGS ── -->
 <section>
-  <div class="sh"><h2>🌾 Fresh Listings</h2><a href="/crops/">See all →</a></div>
+  <div class="sh"><h2>🌾 Fresh Listings</h2><a href="{% url 'crop_list' %}">See all →</a></div>
   {% if all_crops %}
   <div class="g4">
     {% for crop in all_crops|slice:":8" %}
-    <a href="/crop/{{ crop.pk }}/" class="cc">
+    <a href="{% url 'crop_detail' crop.pk %}" class="cc">
       <div class="cc-img">
         {% if crop.photo %}
           <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
@@ -194,7 +194,7 @@
     <span class="empty-icon">🌾</span>
     <h3>No crops yet</h3>
     <p>Be the first farmer to list a crop!</p>
-    <a href="/register/?role=farmer" class="btn btn-gold">List a Crop</a>
+    <a href="{% url 'register' %}?role=farmer" class="btn btn-gold">List a Crop</a>
   </div>
   {% endif %}
 </section>
@@ -257,9 +257,9 @@
   </div>
   <div style="flex-shrink:0">
     {% if is_farmer %}
-      <a href="/farmer-dashboard/" class="btn btn-green btn-lg">Go to Dashboard →</a>
+      <a href="{% url 'farmer_dashboard' %}" class="btn btn-green btn-lg">Go to Dashboard →</a>
     {% else %}
-      <a href="/join/" class="btn btn-green btn-lg">Start Selling Free →</a>
+      <a href="{% url 'role_select' %}" class="btn btn-green btn-lg">Start Selling Free →</a>
     {% endif %}
   </div>
 </div>

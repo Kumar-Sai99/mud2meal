@@ -33,17 +33,17 @@
     <div class="sb-title">
       Filters
       {% if query or category or district %}
-      <a href="/crops/" style="font-size:12px;color:var(--gold);text-decoration:none;font-weight:700">Clear all</a>
+      <a href="{% url 'crop_list' %}" style="font-size:12px;color:var(--gold);text-decoration:none;font-weight:700">Clear all</a>
       {% endif %}
     </div>
 
     <div class="sb-section">
       <div class="sb-lbl">Category</div>
       <div>
-        <a href="/crops/?{% if query %}q={{ query }}&{% endif %}{% if district %}district={{ district }}{% endif %}"
+        <a href="{% url 'crop_list' %}?..." {% if query %}q={{ query }}&{% endif %}{% if district %}district={{ district }}{% endif %}"
            class="filter-tag {% if not category %}sel{% endif %}">All</a>
         {% for cat in categories %}
-        <a href="/crops/?{% if query %}q={{ query }}&{% endif %}category={{ cat.id }}{% if district %}&district={{ district }}{% endif %}"
+        <a href="{% url 'crop_list' %}?..." {% if query %}q={{ query }}&{% endif %}category={{ cat.id }}{% if district %}&district={{ district }}{% endif %}"
            class="filter-tag {% if category == cat.id|stringformat:'s' %}sel{% endif %}">
           {{ cat.icon }} {{ cat.name }}
         </a>
@@ -95,7 +95,7 @@
     {% if crops %}
     <div class="g4">
       {% for crop in crops %}
-      <a href="/crop/{{ crop.pk }}/" class="cc">
+      <a href="{% url 'crop_detail' crop.pk %}" class="cc">
         <div class="cc-img">
           {% if crop.photo %}
             <img src="{{ crop.photo.url }}" alt="{{ crop.name }}">
@@ -144,7 +144,7 @@
       <span class="empty-icon">🔍</span>
       <h3>No crops found</h3>
       <p>Try different filters or search from the top bar.</p>
-      <a href="/crops/" class="btn btn-ghost">Clear filters</a>
+      <a href="{% url 'crop_list' %}" class="btn btn-ghost">Clear filters</a>
     </div>
     {% endif %}
 

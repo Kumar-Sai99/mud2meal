@@ -24,7 +24,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(FarmerProfile)
 class FarmerAdmin(admin.ModelAdmin):
-    list_display = ['user', 'phone', 'district', 'state', 'is_verified', 'upi_id']
+    list_display = ['user', 'phone', 'district', 'state', 'is_verified']
 
 @admin.register(BuyerProfile)
 class BuyerAdmin(admin.ModelAdmin):

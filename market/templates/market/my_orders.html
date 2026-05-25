@@ -2,9 +2,9 @@
 {% block title %}My Orders — Mud2Meal{% endblock %}
 {% block content %}
 {% if is_farmer %}
-<a href="/farmer-dashboard/" class="back">← Back</a>
+<a href="{% url 'farmer_dashboard' %}" class="back">← Back</a>
 {% else %}
-<a href="/home/" class="back">← Back</a>
+<a href="{% url 'home' %}" class="back">← Back</a>
 {% endif %}
 
 <div style="margin-bottom:32px;">
@@ -17,7 +17,7 @@
 {% if orders %}
 <div style="display:flex; flex-direction:column; gap:16px;">
     {% for order in orders %}
-    <a href="/order/{{ order.pk }}/" style="text-decoration:none;">
+    <a href="{% url 'order_detail' order.pk %}" style="text-decoration:none;">
     <div style="background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:24px; display:flex; align-items:center; gap:20px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--bwarm)'" onmouseout="this.style.borderColor='var(--border)'">
 
         <!-- EMOJI -->
@@ -74,7 +74,7 @@
     <p>Orders from buyers will appear here.</p>
     {% else %}
     <p>Browse crops and place your first order!</p>
-    <a href="/crops/" class="btn btn-gold">Browse Crops</a>
+    <a href="{% url 'crop_list' %}" class="btn btn-gold">Browse Crops</a>
     {% endif %}
 </div>
 {% endif %}

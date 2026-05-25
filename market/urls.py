@@ -3,7 +3,7 @@ from django.views.generic import RedirectView
 from . import views, api_views
 
 urlpatterns = [
-    path('',                                   RedirectView.as_view(url='/home/')),
+    path('',                                   RedirectView.as_view(pattern_name='home')),
     path('home/',                              views.home,                  name='home'),
     path('join/',                              views.role_select,           name='role_select'),
     path('register/',                          views.register_view,         name='register'),

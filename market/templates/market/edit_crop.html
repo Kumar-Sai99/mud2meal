@@ -45,9 +45,9 @@
     </div>
     <div style="display:flex;gap:12px">
       <button type="submit" class="btn btn-gold btn-lg">Save Changes</button>
-      <a href="/farmer-dashboard/" class="btn btn-ghost btn-lg">Cancel</a>
+      <a href="{% url 'farmer_dashboard' %}" class="btn btn-ghost btn-lg">Cancel</a>
     </div>
   </form>
 </div>
-  <a href="/farmer-dashboard/" class="back">← Back to Dashboard</a>
+  <a href="{% url 'farmer_dashboard' %}" class="back">← Back to Dashboard</a>
 {% endblock %}

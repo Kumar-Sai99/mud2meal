@@ -33,7 +33,7 @@
   <p class="join-sub">Choose how you want to use the platform. You can only pick one role per account.</p>
 
   <div class="role-cards">
-    <a href="/register/?role=farmer" class="role-card farmer">
+    <a href="{% url 'register' %}?role=farmer" class="role-card farmer">
       <span class="role-emoji">🌾</span>
       <div class="role-name">I'm a Farmer</div>
       <p class="role-desc">List your crops, connect with buyers, get fair prices without middlemen.</p>
@@ -46,7 +46,7 @@
       <div class="role-btn-f">Register as Farmer →</div>
     </a>
 
-    <a href="/register/?role=buyer" class="role-card buyer">
+    <a href="{% url 'register' %}?role=buyer"  class="role-card buyer">
       <span class="role-emoji">🛒</span>
       <div class="role-name">I'm a Buyer</div>
       <p class="role-desc">Browse fresh produce from verified farmers and buy at direct prices.</p>
@@ -60,6 +60,6 @@
     </a>
   </div>
 
-  <p style="font-size:14px;color:var(--text3)">Already have an account? <a href="/login/" style="color:var(--gold);text-decoration:none">Log in →</a></p>
+  <p style="font-size:14px;color:var(--text3)">Already have an account? <a href="{% url 'login' %}" style="color:var(--gold);text-decoration:none">Log in →</a></p>
 </div>
 {% endblock %}

@@ -2,7 +2,7 @@
 {% block title %}Edit Profile — Mud2Meal{% endblock %}
 {% block content %}
 <div style="max-width:680px;margin:0 auto">
-  <a href="/dashboard/" class="back">← Back to Dashboard</a>
+  <a href="{% url 'dashboard' %}" class="back">← Back to Dashboard</a>
 
   <div style="font-family:var(--serif);font-size:30px;color:var(--text);margin-bottom:6px">Edit Profile</div>
   <div style="font-size:14px;color:var(--text3);margin-bottom:32px">Update your personal and contact information</div>
@@ -73,7 +73,7 @@
 
     <div style="display:flex;gap:12px">
       <button type="submit" class="btn btn-gold btn-lg">Save Changes</button>
-      <a href="/dashboard/" class="btn btn-ghost btn-lg">Cancel</a>
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost btn-lg">Cancel</a>
     </div>
   </form>
 </div>

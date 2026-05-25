@@ -79,7 +79,7 @@
           </td>
           <td>
             <div style="display:flex;gap:8px">
-              <a href="/crop/{{ crop.pk }}/edit/" class="btn btn-ghost btn-sm">Edit</a>
+              <a href="{% url 'edit_crop' crop.pk %}" class="btn btn-ghost btn-sm">Edit</a>
               <form method="post" onsubmit="return confirm('Delete {{ crop.name }}?')">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="delete_crop">
