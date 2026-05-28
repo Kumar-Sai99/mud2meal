@@ -349,12 +349,15 @@ def buyer_dashboard(request):
     my_ratings      = Rating.objects.filter(buyer=buyer).select_related('crop', 'crop__farmer__user')
     active_orders   = orders.filter(status__in=['pending', 'confirmed', 'dispatched']).count()
     delivered_count = orders.filter(status='delivered').count()
-    already_rated         = Rating.objects.filter(buyer=buyer).values_list('crop_id', flat=True)
+    reviewed_crop_ids = list(
+    Rating.objects.filter(buyer=buyer).values_list('crop_id', flat=True)
+    )
     unreviewed_deliveries = orders.filter(
         status='delivered'
     ).exclude(
-        crop_id__in=already_rated
+        crop_id__in=reviewed_crop_ids
     ).count()
+    cart_count = Cart.objects.filter(buyer=buyer).count()
 
     return render(request, 'market/buyer_dashboard.html', {
         'buyer'                : buyer,
@@ -364,7 +367,9 @@ def buyer_dashboard(request):
         'delivered_count'      : delivered_count,
         'my_ratings'           : my_ratings,
         'unreviewed_deliveries': unreviewed_deliveries,
-        })
+        'reviewed_crop_ids'    : reviewed_crop_ids,   
+        'cart_count'           : cart_count,           
+    })
 
 
 # ── EDIT PROFILE ─────────────────────────────────────
