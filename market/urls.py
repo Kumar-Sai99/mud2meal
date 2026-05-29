@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/crops/district/<str:district>/', api_views.api_crops_by_district, name='api_crops_by_district'),
     path('api/categories/',                    api_views.api_category_list,     name='api_category_list'),
     path('api/my-crops/',                      api_views.api_my_crops,          name='api_my_crops'),
+    path('api/search/', api_views.api_search_suggestions, name='api_search_suggestions'),
 ]
 
 # Serve media and static files during development

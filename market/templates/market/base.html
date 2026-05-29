@@ -187,6 +187,34 @@
       .main { padding:20px 16px }
       .fc-grid { grid-template-columns:1fr }
     }
+
+    /* SEARCH SUGGESTIONS */
+    .nav-search { position: relative; }
+    .suggestions {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0; right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      z-index: 400;
+      overflow: hidden;
+    }
+    .suggestions.show { display: block; }
+    .sg-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 16px; cursor: pointer;
+      transition: background 0.15s ease;
+      border-bottom: 1px solid var(--border);
+    }
+    .sg-item:last-child { border-bottom: none; }
+    .sg-item:hover { background: var(--surface); }
+    .sg-icon { font-size: 22px; flex-shrink: 0; }
+    .sg-name { font-weight: 700; color: var(--text); font-size: 14px; }
+    .sg-meta { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
+
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -194,9 +222,12 @@
 
 <nav class="nav">
   <a href="{% url 'home' %}" class="nav-logo">Mud<em>2</em>Meal</a>
-  <form class="nav-search" action="{% url 'crop_list' %}" method="get">
+  <form class="nav-search" action="{% url 'crop_list' %}" method="get" id="searchForm">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input name="q" type="text" placeholder="Search crops, districts…" value="{{ request.GET.q }}">
+    <input name="q" id="searchInput" type="text" placeholder="Search crops, districts…"
+           value="{{ request.GET.q }}" autocomplete="off">
+    <!-- dropdown renders here -->
+    <div class="suggestions" id="searchDrop"></div>
   </form>
   <ul class="nav-links">
     <li><a href="{% url 'home' %}">Home</a></li>
@@ -339,6 +370,67 @@ function switchTab(group, id){
   document.querySelector(`[data-group="${group}"][data-tab="${id}"]`).classList.add('active');
   document.querySelector(`[data-panel="${group}"][data-id="${id}"]`).classList.add('active');
 }
+
+/* ── SEARCH SUGGESTIONS ── */
+(function(){
+  const input = document.getElementById('searchInput');
+  const drop  = document.getElementById('searchDrop');
+  const form  = document.getElementById('searchForm');
+  if (!input || !drop) return;
+
+  let timer;
+
+  input.addEventListener('input', function(){
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2){ drop.classList.remove('show'); return; }
+    timer = setTimeout(() => fetchSuggestions(q), 250);
+  });
+
+  async function fetchSuggestions(q){
+    try {
+      const res  = await fetch('/api/search/?q=' + encodeURIComponent(q));
+      const data = await res.json();
+      renderSuggestions(data.suggestions || []);
+    } catch(e){ drop.classList.remove('show'); }
+  }
+
+  function renderSuggestions(items){
+    if (!items.length){ drop.classList.remove('show'); return; }
+    drop.innerHTML = items.map(s =>
+      `<div class="sg-item" onclick="pickSuggestion('${s.name.replace(/'/g,"\\'")}')">
+         <span class="sg-icon" data-crop="${s.name}">🌿</span>
+         <div>
+           <div class="sg-name">${s.name}</div>
+           <div class="sg-meta">${s.category} · 📍 ${s.location}</div>
+         </div>
+       </div>`
+    ).join('');
+    drop.classList.add('show');
+    /* apply smart emoji to suggestion icons */
+    drop.querySelectorAll('[data-crop]').forEach(el => {
+      if (window.cropEmoji) el.textContent = cropEmoji(el.dataset.crop);
+    });
+  }
+
+  window.pickSuggestion = function(name){
+    input.value = name;
+    drop.classList.remove('show');
+    form.submit();
+  };
+
+  /* close on outside click or ESC */
+  document.addEventListener('click', e => {
+    if (!form.contains(e.target)) drop.classList.remove('show');
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') drop.classList.remove('show');
+    if (e.key === 'ArrowDown'){
+      const first = drop.querySelector('.sg-item');
+      if (first) first.focus();
+    }
+  });
+})();
 </script>
 {% block extra_js %}{% endblock %}
 </body>

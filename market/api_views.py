@@ -1,14 +1,11 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Crop, Category, FarmerProfile
-from .serializers import (
-    CropListSerializer, CropDetailSerializer,
-    CategorySerializer, 
-)
-
+from .models import Crop, Category
+from .serializers import (CropListSerializer, CropDetailSerializer,CategorySerializer, )
+from django.db.models import Q
 
 # ── CROP LIST API ─────────────────────────────────────
 @api_view(['GET'])
@@ -136,3 +133,26 @@ def api_my_crops(request):
     })
 
 
+@api_view(['GET'])
+def api_search_suggestions(request):
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        return Response({'suggestions': []})
+
+    crops = Crop.objects.filter(
+        Q(name__icontains=q) |
+        Q(district__icontains=q) |
+        Q(state__icontains=q),
+        status='available'
+    ).select_related('category').values(
+        'name', 'district', 'state',
+        'category__name', 'category__icon'
+    ).distinct()[:8]
+
+    suggestions = [{
+        'name'    : c['name'],
+        'location': f"{c['district']}, {c['state']}",
+        'category': f"{c['category__icon'] or ''} {c['category__name'] or ''}".strip(),
+    } for c in crops]
+
+    return Response({'suggestions': suggestions})
