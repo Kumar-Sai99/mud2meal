@@ -117,7 +117,13 @@ def crop_list(request):
         sort = '-created_at'
 
     crops = Crop.objects.filter(status='available').select_related('farmer__user', 'category')
-    if query:    crops = crops.filter(name__icontains=query)
+    if query:
+        from django.db.models import Q
+        crops = crops.filter(
+            Q(name__icontains=query)     |   # search by crop name
+            Q(district__icontains=query) |   # search by district 
+            Q(state__icontains=query)        # search by state
+        )
     if category: crops = crops.filter(category__id=category)
     if district: crops = crops.filter(district__icontains=district)
     crops = crops.order_by(sort)
