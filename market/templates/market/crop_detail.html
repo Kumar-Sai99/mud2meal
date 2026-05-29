@@ -238,12 +238,10 @@
                         {% endif %}
                     </div>
                     <div class="cc-body">
-                        <div class="cc-foot" style="margin-bottom:6px;">
-                            <div class="cc-name" style="margin:0;">{{ r.name }}</div>
-                            <div>
-                                <span class="cc-price">₹{{ r.price }}</span>
-                                <span class="cc-unit">/{{ r.unit }}</span>
-                            </div>
+                        <div class="cc-name">{{ r.name }}</div>
+                        <div style="display:flex;align-items:baseline;gap:3px;margin-top:8px;white-space:nowrap;">
+                            <span class="cc-price" style="font-size:20px;">₹{{ r.price }}</span>
+                            <span class="cc-unit">/{{ r.unit }}</span>
                         </div>
                     </div>
                 </a>
