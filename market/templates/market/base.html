@@ -249,7 +249,7 @@
         </button>
         <div class="drop">
             <div class="dh">
-                <div class="dh-name">{{ user.get_full_name }}</div>
+                <div class="dh-name">{{ user.get_full_name|default:user.username }}</div>                
                 <div class="dh-role">{% if is_farmer %}🌾 Farmer{% else %}🛒 Buyer{% endif %}</div>
                 <div class="dh-email">{{ user.email }}</div>
             </div>
