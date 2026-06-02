@@ -143,8 +143,10 @@ MESSAGE_TAGS = {
     messages.ERROR:   'error',
 }
 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 1800  # 30 minutes
+# Auto logout after 10 minutes of inactivity
+SESSION_COOKIE_AGE = 600          # 10 minutes in seconds
+SESSION_SAVE_EVERY_REQUEST = True  # reset timer on every click
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # logout when browser closes
 
 # Custom login URL
 LOGIN_URL = '/login/'

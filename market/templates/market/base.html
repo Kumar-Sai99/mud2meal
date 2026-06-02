@@ -243,8 +243,8 @@
     </li>
     <li class="pmenu" id="pmenu">
         <button class="pbtn" onclick="toggleDrop(event)">
-            <div class="pav">{{ user.first_name|first|upper }}</div>
-            <span>{{ user.first_name }}</span>
+            <div class="pav">{{ user.first_name|default:user.username|first|upper }}</div>
+            <span>{{ user.first_name|default:user.username }}</span>
             <span class="pchev">▾</span>
         </button>
         <div class="drop">
