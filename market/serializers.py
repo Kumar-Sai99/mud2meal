@@ -20,7 +20,7 @@ class FarmerSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'full_name', 'email',
             'phone', 'district', 'state',
-            'specialty', 'bio', 'is_verified'
+            'bio', 'is_verified'
         ]
 
 
